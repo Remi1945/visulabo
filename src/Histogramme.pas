@@ -3,7 +3,7 @@ unit Histogramme;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Types, FMX.Types, FMX.Controls, FMX.Objects, FMX.Graphics, System.UITypes,
+  System.SysUtils, Couleurs,System.Classes, System.Types, FMX.Types, FMX.Controls, FMX.Objects, FMX.Graphics, System.UITypes,
   System.UIConsts, System.Math.Vectors, Math;
 
 type
@@ -15,6 +15,7 @@ type
     FMontreSeuils: boolean;
     FNbBins: integer;
     minX, maxX: double;
+    FcoulTexte: TCouls;
     Valeurs: array [0 .. 2047] of uint64;
 
     procedure SetFormatX(Value: string);
@@ -35,6 +36,7 @@ type
     procedure MajValeurs(var val: array of integer; nbvals: integer; redessine: boolean); overload;
     procedure MajHisto(min, max: double; var val: array of integer; lng: integer; redessine: boolean); overload;
   published
+property CouleurTexte: TCouls read FcoulTexte write FcoulTexte;
     property FormatX: String read FFormatX write SetFormatX;
     property SeuilMax: double read FSeuilMax write SetSeuilMax;
     property SeuilMin: double read FSeuilMin write SetSeuilMin;
@@ -58,6 +60,7 @@ var
   i: integer;
 begin
   inherited;
+  FCoulTexte:=Tcouls.Noir;
   FFormatX := '%3.2f';
   minX := 4;
   maxX := 2000;
@@ -290,7 +293,7 @@ begin
   // Fond transparent
   br := TBrush.Create(TBrushKind.Solid, 0);
   rect := TRectF.Create(0, 0, Width, Height);
-  Canvas.FillRect(rect, 0, 0, AllCorners, 100, br);
+  Canvas.FillRect(rect, 0, 0, AllCorners, 100,br);
   br.Free;
 
   HXtxt := Canvas.TextHeight(stXmin);
@@ -332,7 +335,9 @@ begin
   pol[FNbBins + 2] := TPointF.Create(Ox, Oy);
   Canvas.Fill.Color := Stroke.Color;
   Canvas.FillPolygon(pol, 1);
-  // Canvas.Fill.Color := claBlack;
+
+  //Ecriture des textes
+  Canvas.Fill.Color := setCoul(FCoulTexte);
   rect.Left := marge;
   rect.Top := marge;
   rect.Right := rect.Left + LYtxt;
