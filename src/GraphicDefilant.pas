@@ -3,12 +3,14 @@ unit GraphicDefilant;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Types, FMX.Types, FMX.Controls, FMX.Objects, System.UITypes, System.UIConsts;
+  System.SysUtils, Couleurs, System.Classes, System.Types, FMX.Types, FMX.Controls, FMX.Objects, System.UITypes,
+  System.UIConsts;
 
 type
   TGraphicDefilant = class(TRectangle)
   private
     tx: integer;
+    FCoulTexte: TCouls;
     FUnite: String;
     FFormatY: String;
     FTitre: String;
@@ -28,6 +30,8 @@ type
     procedure SetEchelleAuto(Value: boolean);
     procedure SetMontreSeuils(Value: boolean);
     procedure SetTitre(Value: String);
+    procedure setCoulTexte(Value: TCouls);
+
   protected
     { Déclarations protégées }
   public
@@ -45,7 +49,7 @@ type
     property EchelleMax: double read FmaxY write SetMaxi;
     property EchelleMin: double read FminY write SetMini;
     property EchelleAuto: boolean read FEchelleAuto write SetEchelleAuto;
-
+    property CouleurTexte: TCouls read FCoulTexte write setCoulTexte;
     property Titre: String read FTitre write SetTitre;
   end;
 
@@ -65,6 +69,7 @@ var
 begin
   inherited;
   Unite := '';
+  FCoulTexte := TCouls.Noir;
   FFormatY := '%3.2f';
   FSeuilMax := 1.0;
   FSeuilMin := -1.0;
@@ -137,8 +142,7 @@ begin
   rect.Right := Bx;
   rect.Bottom := By;
   Canvas.FillRect(rect, 0, 0, AllCorners, 100);
-  Canvas.Stroke.Color := Stroke.Color;
-  Canvas.Stroke.Thickness := 2;
+  Canvas.Stroke.Color:= Stroke.Color;
   p0.SetLocation(x0, y0);
   for i := 1 to 199 do
   begin
@@ -153,7 +157,7 @@ begin
     Canvas.DrawLine(p0, p1, 1);
     p0.SetLocation(x1, y1);
   end;
-  // Canvas.Fill.Color := claBlack;
+  Canvas.Fill.Color := setCoul(FCoulTexte);
   rect.Left := marge;
   rect.Top := marge;
   rect.Right := rect.Left + LYtxt;
@@ -197,10 +201,31 @@ begin
   Canvas.EndScene();
 end;
 
+procedure TGraphicDefilant.setCoulTexte(Value: TCouls);
+begin
+  FCoulTexte := Value;
+end;
+
 // ---------------------------------------------------------------------------
 procedure TGraphicDefilant.SetEchelleAuto(Value: boolean);
+var
+  i: integer;
 begin
   FEchelleAuto := Value;
+  if FEchelleAuto then
+  begin
+
+    FminY := Valeurs[0];
+    FmaxY := Valeurs[0];
+    for i := 1 to 199 do
+    begin
+      if Valeurs[i] > FmaxY then
+        FmaxY := Valeurs[i];
+      if Valeurs[i] < FminY then
+        FminY := Valeurs[i];
+    end;
+    Repaint;
+  end;
 end;
 
 procedure TGraphicDefilant.SetFormatY(Value: String);

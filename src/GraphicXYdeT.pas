@@ -3,10 +3,10 @@ unit GraphicXYdeT;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Types, FMX.Types, FMX.Controls, FMX.Objects, System.UITypes, System.UIConsts;
+  System.SysUtils,Couleurs, System.Classes, System.Types, FMX.Types, FMX.Controls, FMX.Objects, System.UITypes, System.UIConsts;
 
 type
-  TCouls = (Rouge, Vert, Orange, Bleu, Blanc, Noir);
+
 
   TGraphicXYdeT = class(TRectangle)
   private
@@ -179,23 +179,7 @@ var
     px := dx * (vx - FminX) + Ox;
   end;
 
-  function getCouleur(coul: TCouls): TAlphaColor;
-  begin
-    case coul of
-      Rouge:
-        result := claRed;
-      Vert:
-        result := claGreen;
-      Orange:
-        result := claOrange;
-      Bleu:
-        result := claBlue;
-      Blanc:
-        result := claWhite;
-      Noir:
-        result := claBlack;
-    end;
-  end;
+  
 
 begin
   p0 := TPointF.Create(0, 0);
@@ -262,7 +246,7 @@ begin
     Canvas.DrawLine(p0, p1, 1);
     p0.SetLocation(x1, y1);
   end;
-  Canvas.Stroke.Color := getCouleur(FcoulDerPts);
+  Canvas.Stroke.Color := setCoul(FcoulDerPts);
   Canvas.DrawEllipse(TRectF.Create(p0.X - 4, p0.Y - 4, p0.X + 4, p0.Y + 4), 1);
   // Point centrale de la grille ou de l'axe
   if (FmaxX > 0) and (FminX < 0) then
@@ -277,7 +261,7 @@ begin
   // Tracé de la grille
   if FGrille and (FGraduationMajeure > 0) then
   begin
-    Canvas.Stroke.Color := getCouleur(FcoulGrille);
+    Canvas.Stroke.Color := setCoul(FcoulGrille);
     Canvas.Stroke.Thickness := 1;
     a := trunc((FminX - Xc) / FGraduationMajeure);
     b := trunc((FmaxX - Xc) / FGraduationMajeure);
@@ -298,7 +282,7 @@ begin
   // tracé de l'axe
   if FAxe then
   begin
-    Canvas.Stroke.Color := getCouleur(FcoulAxe);
+    Canvas.Stroke.Color := setCoul(FcoulAxe);
     Canvas.Stroke.Thickness := 1;
     Canvas.DrawLine(TPointF.Create(Gx, Ay), TPointF.Create(Gx, Oy), 1);
     Canvas.DrawLine(TPointF.Create(Ox, Gy), TPointF.Create(Bx, Gy), 1);
@@ -341,7 +325,7 @@ begin
   end;
   if FZone then
   begin
-    Canvas.Stroke.Color := getCouleur(FcoulZone);
+    Canvas.Stroke.Color := setCoul(FcoulZone);
     Canvas.Stroke.Thickness := 1;
     ValToPoint(ZminX, ZminY, x1, y1);
     ValToPoint(ZmaxX, ZminY, x0, y0);
@@ -359,7 +343,7 @@ begin
   rect.Top := Ay - HYtxt0 / 2;
   rect.Right := rect.Left + LYtxt;
   rect.Bottom := rect.Top + HYtxt1;
-  Canvas.Fill.Color := getCouleur(FcoulTexte);
+  Canvas.Fill.Color := setCoul(FcoulTexte);
 
   Canvas.FillText(rect, stYmax, false, 1, [], TTextAlign.Center, TTextAlign.Center);
 

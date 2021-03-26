@@ -39,6 +39,7 @@ contains
   GraphicXYdeT in 'GraphicXYdeT.pas',
   Histogramme in 'Histogramme.pas',
   JaugeCir in 'JaugeCir.pas',
-  Thermometre in 'Thermometre.pas';
+  Thermometre in 'Thermometre.pas',
+  Couleurs in 'Couleurs.pas';
 
 end.

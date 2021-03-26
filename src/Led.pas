@@ -3,10 +3,10 @@ unit Led;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Types, System.UIConsts, FMX.Types, FMX.Controls, FMX.Objects, FMX.Graphics;
+  System.SysUtils,Couleurs, System.Classes, System.Types, System.UIConsts, FMX.Types, FMX.Controls, FMX.Objects, FMX.Graphics;
 
 type
-  TCouls = (Rouge, Vert, Orange, Bleu);
+
 
   TLed = class(TCircle)
   private
@@ -54,16 +54,7 @@ begin
   Fill.Gradient.Style := TGradientStyle.Radial;
   if ledON then
   begin
-    case CouleurON of
-      Rouge:
-        Fill.Gradient.Color := claRed;
-      Vert:
-        Fill.Gradient.Color := claGreen;
-      Orange:
-        Fill.Gradient.Color := claOrange;
-      Bleu:
-        Fill.Gradient.Color := claBlue;
-    end;
+    Fill.Gradient.Color := setCoul(CouleurON);
   end
   else
     Fill.Gradient.Color := claGray;
