@@ -3,14 +3,14 @@ unit GraphicDefilant;
 interface
 
 uses
-  System.SysUtils, Couleurs, System.Classes, System.Types, FMX.Types, FMX.Controls, FMX.Objects, System.UITypes,
-  System.UIConsts;
+  System.SysUtils, Couleurs, TextControlTextSettings, System.Classes, System.Types, FMX.Types, FMX.Controls,
+  FMX.Objects, System.UITypes, FMX.Graphics, System.UIConsts;
 
 type
   TGraphicDefilant = class(TRectangle)
   private
     tx: integer;
-    FCoulTexte: TCouls;
+
     FUnite: String;
     FFormatY: String;
     FTitre: String;
@@ -20,6 +20,7 @@ type
     FMontreSeuils: boolean;
     FEchelleAuto: boolean;
     FminY, FmaxY: double;
+    FTextSettingsInfo: TTextSettingsInfo;
 
     procedure SetUnite(Value: String);
     procedure SetFormatY(Value: String);
@@ -30,8 +31,11 @@ type
     procedure SetEchelleAuto(Value: boolean);
     procedure SetMontreSeuils(Value: boolean);
     procedure SetTitre(Value: String);
-    procedure setCoulTexte(Value: TCouls);
 
+    function GetDefaultTextSettings: TTextSettings;
+    function GetTextSettings: TTextSettings;
+    function GetTextSettingsClass: TTextSettingsInfo.TCustomTextSettingsClass;
+    procedure SetTextSettings(const Value: TTextSettings);
   protected
     { Déclarations protégées }
   public
@@ -40,6 +44,9 @@ type
     procedure AjouteValeur(val: double; redessine: boolean); overload;
     procedure AjouteValeur(min, max, val: double; redessine: boolean); overload;
     function HorsLimites: integer;
+    /// <summary>Stores a TTextSettings type object keeping the default values of the text representation properties</summary>
+    property DefaultTextSettings: TTextSettings read GetDefaultTextSettings;
+
   published
     property Unite: String read FUnite write SetUnite;
     property FormatY: String read FFormatY write SetFormatY;
@@ -49,8 +56,9 @@ type
     property EchelleMax: double read FmaxY write SetMaxi;
     property EchelleMin: double read FminY write SetMini;
     property EchelleAuto: boolean read FEchelleAuto write SetEchelleAuto;
-    property CouleurTexte: TCouls read FCoulTexte write setCoulTexte;
+
     property Titre: String read FTitre write SetTitre;
+    property TextSettings: TTextSettings read GetTextSettings write SetTextSettings;
   end;
 
 procedure Register;
@@ -69,7 +77,7 @@ var
 begin
   inherited;
   Unite := '';
-  FCoulTexte := TCouls.Noir;
+
   FFormatY := '%3.2f';
   FSeuilMax := 1.0;
   FSeuilMin := -1.0;
@@ -77,6 +85,7 @@ begin
   FEchelleAuto := true;
   FminY := 0;
   FmaxY := 1;
+  FTextSettingsInfo := TTextSettingsInfo.Create(Self, GetTextSettingsClass);
   for i := 0 to 199 do
     Valeurs[i] := i * 1.5 - 10;
 end;
@@ -104,6 +113,11 @@ begin
   stYmax := Format(FormatY, [FmaxY]) + Unite;
   stXmin := Format('%d', [tx]);
   stXmax := Format('%d', [tx + 199]);
+
+  Canvas.Font.Family:=TextSettings.Font.Family;
+  Canvas.Font.Size:=TextSettings.Font.Size;
+  Canvas.Font.Style:=TextSettings.Font.Style;
+
   Canvas.BeginScene();
 
   HXtxt := Canvas.TextHeight(stXmin);
@@ -142,7 +156,7 @@ begin
   rect.Right := Bx;
   rect.Bottom := By;
   Canvas.FillRect(rect, 0, 0, AllCorners, 100);
-  Canvas.Stroke.Color:= Stroke.Color;
+  Canvas.Stroke.Color := Stroke.Color;
   p0.SetLocation(x0, y0);
   for i := 1 to 199 do
   begin
@@ -157,7 +171,7 @@ begin
     Canvas.DrawLine(p0, p1, 1);
     p0.SetLocation(x1, y1);
   end;
-  Canvas.Fill.Color := setCoul(FCoulTexte);
+  Canvas.Fill.Color := TextSettings.FontColor;
   rect.Left := marge;
   rect.Top := marge;
   rect.Right := rect.Left + LYtxt;
@@ -201,10 +215,7 @@ begin
   Canvas.EndScene();
 end;
 
-procedure TGraphicDefilant.setCoulTexte(Value: TCouls);
-begin
-  FCoulTexte := Value;
-end;
+
 
 // ---------------------------------------------------------------------------
 procedure TGraphicDefilant.SetEchelleAuto(Value: boolean);
@@ -334,6 +345,26 @@ begin
     result := 1
   else
     result := 0;
+end;
+
+function TGraphicDefilant.GetDefaultTextSettings: TTextSettings;
+begin
+  result := FTextSettingsInfo.DefaultTextSettings;
+end;
+
+function TGraphicDefilant.GetTextSettings: TTextSettings;
+begin
+  result := FTextSettingsInfo.TextSettings;
+end;
+
+procedure TGraphicDefilant.SetTextSettings(const Value: TTextSettings);
+begin
+  FTextSettingsInfo.TextSettings.Assign(Value);
+end;
+
+function TGraphicDefilant.GetTextSettingsClass: TTextSettingsInfo.TCustomTextSettingsClass;
+begin
+  result := TTextControlTextSettings;
 end;
 
 end.

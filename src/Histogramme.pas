@@ -3,8 +3,9 @@ unit Histogramme;
 interface
 
 uses
-  System.SysUtils, Couleurs,System.Classes, System.Types, FMX.Types, FMX.Controls, FMX.Objects, FMX.Graphics, System.UITypes,
-  System.UIConsts, System.Math.Vectors, Math;
+  System.SysUtils, Couleurs, System.Classes, System.Types, FMX.Types, FMX.Controls, FMX.Objects, FMX.Graphics,
+  System.UITypes,
+  System.UIConsts, System.Math.Vectors, Math, TextControlTextSettings;
 
 type
   THistogramme = class(TRectangle)
@@ -13,16 +14,23 @@ type
     FSeuilMax: double;
     FSeuilMin: double;
     FMontreSeuils: boolean;
+    FMontreGradY: boolean;
     FNbBins: integer;
     minX, maxX: double;
-    FcoulTexte: TCouls;
+
     Valeurs: array [0 .. 2047] of uint64;
+    FTextSettingsInfo: TTextSettingsInfo;
 
     procedure SetFormatX(Value: string);
     procedure SetSeuilMin(Value: double);
     procedure SetSeuilMax(Value: double);
     procedure SetNbBins(Value: integer);
     procedure SetMontreSeuils(Value: boolean);
+    procedure SetMontreGradY(Value: boolean);
+    function GetDefaultTextSettings: TTextSettings;
+    function GetTextSettings: TTextSettings;
+    function GetTextSettingsClass: TTextSettingsInfo.TCustomTextSettingsClass;
+    procedure SetTextSettings(const Value: TTextSettings);
   protected
 
   public
@@ -35,14 +43,18 @@ type
     procedure MajValeurs(min, max: integer; var val: array of integer; nbvals: integer; redessine: boolean); overload;
     procedure MajValeurs(var val: array of integer; nbvals: integer; redessine: boolean); overload;
     procedure MajHisto(min, max: double; var val: array of integer; lng: integer; redessine: boolean); overload;
+    /// <summary>Stores a TTextSettings type object keeping the default values of the text representation properties</summary>
+    property DefaultTextSettings: TTextSettings read GetDefaultTextSettings;
+
   published
-property CouleurTexte: TCouls read FcoulTexte write FcoulTexte;
+
     property FormatX: String read FFormatX write SetFormatX;
     property SeuilMax: double read FSeuilMax write SetSeuilMax;
     property SeuilMin: double read FSeuilMin write SetSeuilMin;
     property MontreSeuils: boolean read FMontreSeuils write SetMontreSeuils;
+    property MontreGraduationY: boolean read FMontreGradY write SetMontreGradY;
     property NombreDeClasse: integer read FNbBins write SetNbBins;
-
+    property TextSettings: TTextSettings read GetTextSettings write SetTextSettings;
   end;
 
 procedure Register;
@@ -60,7 +72,11 @@ var
   i: integer;
 begin
   inherited;
-  FCoulTexte:=Tcouls.Noir;
+  FTextSettingsInfo := TTextSettingsInfo.Create(Self, GetTextSettingsClass);
+  FMontreGradY := false;
+  FMontreSeuils := false;
+  FSeuilMax := 20;
+  FSeuilMin := 180;
   FFormatX := '%3.2f';
   minX := 4;
   maxX := 2000;
@@ -91,6 +107,11 @@ begin
 end;
 
 // ---------------------------------------------------------------------------
+procedure THistogramme.SetMontreGradY(Value: boolean);
+begin
+  FMontreGradY := Value;
+end;
+
 procedure THistogramme.SetMontreSeuils(Value: boolean);
 begin
   FMontreSeuils := Value;
@@ -265,13 +286,13 @@ var
   HXtxt, LYtxt, HYtxt1, HYtxt0, LXtxt1, LXtxt0, Ay, Ax, Ox, Oy, By, Bx, cAx, cAy, x0, y0: Single;
   pol: TPolygon;
   x, y: Single;
-  //p0, p1: TPointF;
+  // p0, p1: TPointF;
   amplitude, grad, agrad: Single;
   ig: integer;
   valG, xGrad, Hgrad, Wgrad: Single;
   deci: double;
   ndeci, ng0, ng1: integer;
-  limgradx: Single;
+  ygrd, limgradx: Single;
 
 begin
   maxY := -1;
@@ -284,6 +305,11 @@ begin
   begin
     maxY := 1;
   end;
+
+  Canvas.Font.Family := TextSettings.Font.Family;
+  Canvas.Font.Size := TextSettings.Font.Size;
+  Canvas.Font.Style := TextSettings.Font.Style;
+
   Canvas.BeginScene();
   stYmin := '0';
   stYmax := Format('%d', [maxY]);
@@ -293,7 +319,7 @@ begin
   // Fond transparent
   br := TBrush.Create(TBrushKind.Solid, 0);
   rect := TRectF.Create(0, 0, Width, Height);
-  Canvas.FillRect(rect, 0, 0, AllCorners, 100,br);
+  Canvas.FillRect(rect, 0, 0, AllCorners, 100, br);
   br.Free;
 
   HXtxt := Canvas.TextHeight(stXmin);
@@ -333,11 +359,11 @@ begin
   end;
   pol[FNbBins + 1] := TPointF.Create(x - cAx, By);
   pol[FNbBins + 2] := TPointF.Create(Ox, Oy);
-  Canvas.Fill.Color := Stroke.Color;
+  Canvas.Fill := Fill;
   Canvas.FillPolygon(pol, 1);
 
-  //Ecriture des textes
-  Canvas.Fill.Color := setCoul(FCoulTexte);
+  // Ecriture des textes
+  Canvas.Fill.Color := TextSettings.FontColor;
   rect.Left := marge;
   rect.Top := marge;
   rect.Right := rect.Left + LYtxt;
@@ -360,6 +386,8 @@ begin
   rect.Bottom := Oy + marge + HXtxt;
   Canvas.FillText(rect, stXmax, false, 1, [], TTextAlign.Center, TTextAlign.Center);
   // tracé des graduations:
+  Canvas.Stroke.Color := Stroke.Color;
+  Canvas.Stroke.Dash := TStrokeDash.Solid;
 {$IFDEF GRADSIMPLE}
   amplitude := (maxX - minX);
   if amplitude > 0 then
@@ -422,6 +450,14 @@ begin
     end;
   end;
 {$ENDIF}
+  if FMontreGradY then
+  begin
+    Canvas.Stroke.Dash := Stroke.Dash;
+    ygrd := (Ay - Oy) / 4;
+    for ig := 1 to 3 do
+      Canvas.DrawLine(TPointF.Create(Ox, Oy + ig * ygrd), TPointF.Create(Bx, Oy + ig * ygrd), 1);
+  end;
+
   if MontreSeuils then
   begin
     if (SeuilMax > minX) and (SeuilMax < maxX) then
@@ -429,7 +465,7 @@ begin
       Canvas.Stroke.Color := claRed;
       Canvas.Stroke.Thickness := 1;
       x := (SeuilMax - minX) * (Bx - Ox) / (maxX - minX) + Ox;
-      Canvas.DrawLine(TPointF.Create(x, Oy),TPointF.Create(x, Ay), 1);
+      Canvas.DrawLine(TPointF.Create(x, Oy), TPointF.Create(x, Ay), 1);
     end;
 
     if (SeuilMin > minX) and (SeuilMin < maxX) then
@@ -437,11 +473,31 @@ begin
       Canvas.Stroke.Color := claBlue;
       Canvas.Stroke.Thickness := 1;
       x := (SeuilMin - minX) * (Bx - Ox) / (maxX - minX) + Ox;
-      Canvas.DrawLine(TPointF.Create(x, Oy),TPointF.Create(x, Ay), 1);
+      Canvas.DrawLine(TPointF.Create(x, Oy), TPointF.Create(x, Ay), 1);
     end;
   end;
 
   Canvas.EndScene();
+end;
+
+function THistogramme.GetDefaultTextSettings: TTextSettings;
+begin
+  result := FTextSettingsInfo.DefaultTextSettings;
+end;
+
+function THistogramme.GetTextSettings: TTextSettings;
+begin
+  result := FTextSettingsInfo.TextSettings;
+end;
+
+procedure THistogramme.SetTextSettings(const Value: TTextSettings);
+begin
+  FTextSettingsInfo.TextSettings.Assign(Value);
+end;
+
+function THistogramme.GetTextSettingsClass: TTextSettingsInfo.TCustomTextSettingsClass;
+begin
+  result := TTextControlTextSettings;
 end;
 
 end.

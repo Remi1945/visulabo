@@ -3,15 +3,14 @@ unit GraphicXYdeT;
 interface
 
 uses
-  System.SysUtils,Couleurs, System.Classes, System.Types, FMX.Types, FMX.Controls, FMX.Objects, System.UITypes, System.UIConsts;
+  System.SysUtils, Couleurs, TextControlTextSettings, System.Classes, System.Types, FMX.Types, FMX.Controls,
+  FMX.Graphics, FMX.Objects, System.UITypes, System.UIConsts;
 
 type
-
 
   TGraphicXYdeT = class(TRectangle)
   private
     FcoulDerPts: TCouls;
-    FcoulTexte: TCouls;
     FcoulAxe: TCouls;
     FcoulZone: TCouls;
     FcoulGrille: TCouls;
@@ -33,6 +32,7 @@ type
     ZminX, ZmaxX: double;
     FGraduationMajeure, FGraduationMineure: double;
     FLgGrdMaj, FLgGrdMin: integer;
+    FTextSettingsInfo: TTextSettingsInfo;
 
     procedure SetUniteX(Value: String);
     procedure SetUniteY(Value: String);
@@ -57,7 +57,10 @@ type
     procedure SetGraduationMineure(Value: double);
     procedure SetLgGrdMaj(Value: integer);
     procedure SetLgGrdMin(Value: integer);
-
+    function GetDefaultTextSettings: TTextSettings;
+    function GetTextSettings: TTextSettings;
+    function GetTextSettingsClass: TTextSettingsInfo.TCustomTextSettingsClass;
+    procedure SetTextSettings(const Value: TTextSettings);
   protected
     { Déclarations protégées }
   public
@@ -66,7 +69,6 @@ type
     procedure AjouteValeur(valx, valy: double; redessine: boolean); overload;
   published
     property CouleurDernierPoint: TCouls read FcoulDerPts write FcoulDerPts;
-    property CouleurTexte: TCouls read FcoulTexte write FcoulTexte;
     property CouleurAxe: TCouls read FcoulAxe write FcoulAxe;
     property CouleurGrille: TCouls read FcoulGrille write FcoulGrille;
     property CouleurZone: TCouls read FcoulZone write FcoulZone;
@@ -95,6 +97,7 @@ type
     property GraduationMineure: double read FGraduationMineure write SetGraduationMineure;
     property LongueurGraduationMajeure: integer read FLgGrdMaj write SetLgGrdMaj;
     property LongueurGraduationMineure: integer read FLgGrdMin write SetLgGrdMin;
+    property TextSettings: TTextSettings read GetTextSettings write SetTextSettings;
   end;
 
 procedure Register;
@@ -127,7 +130,7 @@ begin
   ZmaxY := 0.5;
 
   FCarre := false;
-  FcoulTexte := Noir;
+
   FcoulAxe := Orange;
   FcoulZone := Vert;
   FcoulGrille := Bleu;
@@ -136,11 +139,13 @@ begin
   FLgGrdMaj := 16;
   FLgGrdMin := 8;
 
+  FTextSettingsInfo := TTextSettingsInfo.Create(Self, GetTextSettingsClass);
+
   FNbValeurs := 200;
   for i := 0 to FNbValeurs - 1 do
   begin
-    ValeursX[i] := i * 0.1 - 10+(random(100)-50)/200;
-    ValeursY[i] := i * 0.1 - 10+(random(100)-50)/200;
+    ValeursX[i] := i * 0.1 - 10 + (random(100) - 50) / 200;
+    ValeursY[i] := i * 0.1 - 10 + (random(100) - 50) / 200;
   end;
 end;
 
@@ -179,8 +184,6 @@ var
     px := dx * (vx - FminX) + Ox;
   end;
 
-  
-
 begin
   p0 := TPointF.Create(0, 0);
   p1 := TPointF.Create(0, 0);
@@ -190,6 +193,10 @@ begin
   stXmax := Format(FormatX, [FmaxX]) + UniteX;
   stYmin := Format(FormatY, [FminY]) + UniteY;
   stYmax := Format(FormatY, [FmaxY]) + UniteY;
+
+  Canvas.Font.Family := TextSettings.Font.Family;
+  Canvas.Font.Size := TextSettings.Font.Size;
+  Canvas.Font.Style := TextSettings.Font.Style;
 
   Canvas.BeginScene();
 
@@ -343,7 +350,7 @@ begin
   rect.Top := Ay - HYtxt0 / 2;
   rect.Right := rect.Left + LYtxt;
   rect.Bottom := rect.Top + HYtxt1;
-  Canvas.Fill.Color := setCoul(FcoulTexte);
+  Canvas.Fill.Color := TextSettings.FontColor;
 
   Canvas.FillText(rect, stYmax, false, 1, [], TTextAlign.Center, TTextAlign.Center);
 
@@ -449,7 +456,6 @@ begin
   FminY := Value;
 end;
 
-
 // ---------------------------------------------------------------------------
 procedure TGraphicXYdeT.SetMaxiZX(Value: double);
 begin
@@ -553,6 +559,26 @@ begin
   ValeursY[FNbValeurs - 1] := valy;
   if redessine then
     Repaint;
+end;
+
+function TGraphicXYdeT.GetDefaultTextSettings: TTextSettings;
+begin
+  result := FTextSettingsInfo.DefaultTextSettings;
+end;
+
+function TGraphicXYdeT.GetTextSettings: TTextSettings;
+begin
+  result := FTextSettingsInfo.TextSettings;
+end;
+
+procedure TGraphicXYdeT.SetTextSettings(const Value: TTextSettings);
+begin
+  FTextSettingsInfo.TextSettings.Assign(Value);
+end;
+
+function TGraphicXYdeT.GetTextSettingsClass: TTextSettingsInfo.TCustomTextSettingsClass;
+begin
+  result := TTextControlTextSettings;
 end;
 
 end.
