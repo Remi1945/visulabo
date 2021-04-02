@@ -4,7 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Types, FMX.Types, FMX.Controls, FMX.Objects, FMX.Graphics, System.UITypes,
-  System.UIConsts, System.Math.Vectors, System.Math;
+  System.UIConsts, System.Math.Vectors, System.Math, TextControlTextSettings;
 
 type
   TGenre = (AiguilleTournante, CadranTournant);
@@ -15,6 +15,7 @@ type
     FMontreGraduationMajeure, FMontreGraduationMineure: boolean;
     FEpaisseurBordure, FLgGrdMaj, FLgGrdMin: integer;
     FGenre: TGenre;
+    FTextSettingsInfo: TTextSettingsInfo;
 
     procedure SetEpaisseurBordure(Value: integer);
     procedure SetLgGrdMaj(Value: integer);
@@ -24,12 +25,17 @@ type
     procedure SetGraduationMineure(Value: single);
     procedure SetMontreGraduationMajeure(Value: boolean);
     procedure SetMontreGraduationMineure(Value: boolean);
-
+    function GetDefaultTextSettings: TTextSettings;
+    function GetTextSettings: TTextSettings;
+    function GetTextSettingsClass: TTextSettingsInfo.TCustomTextSettingsClass;
+    procedure SetTextSettings(const Value: TTextSettings);
   protected
     { Déclarations protégées }
   public
     constructor Create(AOwner: TComponent); override;
     procedure Paint; override;
+    /// <summary>Stores a TTextSettings type object keeping the default values of the text representation properties</summary>
+    property DefaultTextSettings: TTextSettings read GetDefaultTextSettings;
 
   published
     property Genre: TGenre read FGenre write FGenre;
@@ -41,6 +47,7 @@ type
     property GraduationMineure: single read FGraduationMineure write SetGraduationMineure;
     property MontreGraduationMineure: boolean read FMontreGraduationMineure write SetMontreGraduationMineure;
     property MontreGraduationMajeure: boolean read FMontreGraduationMajeure write SetMontreGraduationMajeure;
+    property TextSettings: TTextSettings read GetTextSettings write SetTextSettings;
   end;
 
 procedure Register;
@@ -87,6 +94,9 @@ begin
   rayon := rayon / 2;
   rbord := rayon - FEpaisseurBordure;
   // Calcul de la hauteur et de la largeur max des étiquettes
+  Canvas.Font.Family := TextSettings.Font.Family;
+  Canvas.Font.Size := TextSettings.Font.Size;
+  Canvas.Font.Style := TextSettings.Font.Style;
 
   Wtxt := Canvas.TextWidth('000');
   rtxt := (rayon - FLgGrdMaj) - Wtxt;
@@ -120,6 +130,10 @@ begin
       bmpEcr.Height := round(Wtxt * 2);
       bmpEcr.Canvas.BeginScene;
       br := TBrush.Create(TBrushKind.Solid, claBlack);
+      bmpEcr.Canvas.Font.Family := TextSettings.Font.Family;
+      bmpEcr.Canvas.Font.Size := TextSettings.Font.Size;
+      bmpEcr.Canvas.Font.Style := TextSettings.Font.Style;
+
       bmpEcr.Canvas.FillRect(TRectF.Create(0, 0, bmpEcr.Width, bmpEcr.Height), 0, 0, AllCorners, 100, br);
       br.Free;
       M := bmpEcr.Canvas.Matrix;
@@ -128,7 +142,7 @@ begin
       M := M * TMatrix.CreateTranslation(Wtxt, Wtxt);
       bmpEcr.Canvas.SetMatrix(M);
 
-      bmpEcr.Canvas.Fill.Color := claYellow;
+      bmpEcr.Canvas.Fill.Color := TextSettings.FontColor;
       st := Format('%.3d', [round(i * FGraduationMajeure)]);
       bmpEcr.Canvas.FillText(TRectF.Create(0, 0, 2 * Wtxt, 2 * Wtxt), st, false, 1, [], TTextAlign.Center,
         TTextAlign.Center);
@@ -195,12 +209,12 @@ begin
     alpha := DegToRad(FValeur - 90);
     aiguille[2] := TPointF.Create(Xc + rayon / 8 * sin(alpha), Yc - rayon / 8 * cos(alpha));
     aiguille[3] := aiguille[0];
-    Canvas.Fill.Color:=claRed;
+    Canvas.Fill.Color := claRed;
     Canvas.FillPolygon(aiguille, 1);
-    alpha := DegToRad(FValeur+180);
+    alpha := DegToRad(FValeur + 180);
     aiguille[0] := TPointF.Create(Xc + (rayon - FLgGrdMaj) * sin(alpha), Yc - (rayon - FLgGrdMaj) * cos(alpha));
     aiguille[3] := aiguille[0];
-    Canvas.Fill.Color:=claWhite;
+    Canvas.Fill.Color := claWhite;
     Canvas.FillPolygon(aiguille, 1);
   end;
   Canvas.EndScene;
@@ -218,7 +232,8 @@ begin
   FEpaisseurBordure := 4;
   FLgGrdMaj := 16;
   FLgGrdMin := 8;
-  FGenre:=CadranTournant;
+  FGenre := CadranTournant;
+  FTextSettingsInfo := TTextSettingsInfo.Create(Self, GetTextSettingsClass);
 end;
 
 procedure TBoussole.SetEpaisseurBordure(Value: integer);
@@ -265,6 +280,25 @@ begin
   FMontreGraduationMineure := Value;
 end;
 
+function TBoussole.GetDefaultTextSettings: TTextSettings;
+begin
+  Result := FTextSettingsInfo.DefaultTextSettings;
+end;
+
+function TBoussole.GetTextSettings: TTextSettings;
+begin
+  Result := FTextSettingsInfo.TextSettings;
+end;
+
+procedure TBoussole.SetTextSettings(const Value: TTextSettings);
+begin
+  FTextSettingsInfo.TextSettings.Assign(Value);
+end;
+
+function TBoussole.GetTextSettingsClass: TTextSettingsInfo.TCustomTextSettingsClass;
+begin
+  Result := TTextControlTextSettings;
+end;
 
 
 // initialization

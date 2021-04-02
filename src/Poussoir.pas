@@ -29,7 +29,7 @@ type
     procedure Paint; override;
     /// <summary>Stores a TTextSettings type object keeping the default values of the text representation properties</summary>
     property DefaultTextSettings: TTextSettings read GetDefaultTextSettings;
-    /// <summary>Stores a TTextSettings type object, which handles the text representation properties to be used for drawing the text in this control</summary>
+
 
 
   published
