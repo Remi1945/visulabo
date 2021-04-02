@@ -40,6 +40,10 @@ contains
   Histogramme in 'Histogramme.pas',
   JaugeCir in 'JaugeCir.pas',
   Thermometre in 'Thermometre.pas',
-  Couleurs in 'Couleurs.pas';
+  Couleurs in 'Couleurs.pas',
+  Selecteur in 'Selecteur.pas',
+  Interrupteur in 'Interrupteur.pas',
+  Poussoir in 'Poussoir.pas',
+  TextControlTextSettings in 'TextControlTextSettings.pas';
 
 end.

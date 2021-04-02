@@ -139,8 +139,8 @@ begin
   FNbValeurs := 200;
   for i := 0 to FNbValeurs - 1 do
   begin
-    ValeursX[i] := i * 1.5 - 10;
-    ValeursY[i] := i * 1.5 - 10;
+    ValeursX[i] := i * 0.1 - 10+(random(100)-50)/200;
+    ValeursY[i] := i * 0.1 - 10+(random(100)-50)/200;
   end;
 end;
 
