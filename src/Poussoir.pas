@@ -6,42 +6,47 @@ uses
   System.SysUtils, Couleurs, System.Classes, System.Types, System.UIConsts, FMX.Types, FMX.Controls, FMX.Objects,
   FMX.Graphics, System.Math.Vectors, System.UITypes, TextControlTextSettings;
 
-
 type
   TPoussoir = class(TRectangle)
   private
     FTexte: String;
     Fon: boolean;
-    FcoulBORD, FcoulTEXTEON, FcoulTEXTEOFF, FcoulON, FcoulOFF: TCouls;
+    FcoulON, FcoulOFF: TCouls;
     FEpaisseurBordure: integer;
-    FTextSettingsInfo: TTextSettingsInfo;
+    FTextSettingsInfoON: TTextSettingsInfo;
+    FTextSettingsInfoOFF: TTextSettingsInfo;
 
     procedure SetEpaisseurBordure(Value: integer);
     procedure setOnOff(valeur: boolean);
-    function GetDefaultTextSettings: TTextSettings;
-    function GetTextSettings: TTextSettings;
-    function GetTextSettingsClass: TTextSettingsInfo.TCustomTextSettingsClass;
-    procedure SetTextSettings(const Value: TTextSettings);
+
+    function GetDefaultTextSettingsON: TTextSettings;
+    function GetTextSettingsON: TTextSettings;
+    function GetTextSettingsClassON: TTextSettingsInfo.TCustomTextSettingsClass;
+    procedure SetTextSettingsON(const Value: TTextSettings);
+
+    function GetDefaultTextSettingsOFF: TTextSettings;
+    function GetTextSettingsOFF: TTextSettings;
+    function GetTextSettingsClassOFF: TTextSettingsInfo.TCustomTextSettingsClass;
+    procedure SetTextSettingsOFF(const Value: TTextSettings);
+
   protected
     { Déclarations protégées }
   public
     constructor Create(AOwner: TComponent); override;
     procedure Paint; override;
     /// <summary>Stores a TTextSettings type object keeping the default values of the text representation properties</summary>
-    property DefaultTextSettings: TTextSettings read GetDefaultTextSettings;
-
-
+    property DefaultTextSettingsON: TTextSettings read GetDefaultTextSettingsON;
+    property DefaultTextSettingsOFF: TTextSettings read GetDefaultTextSettingsOFF;
 
   published
     property Contact: boolean read Fon write setOnOff;
     property Texte: string read FTexte write FTexte;
-    property CouleurBORD: TCouls read FcoulBORD write FcoulBORD;
+
     property CouleurON: TCouls read FcoulON write FcoulON;
     property CouleurOFF: TCouls read FcoulOFF write FcoulOFF;
-    property CouleurTexteON: TCouls read FcoulTEXTEON write FcoulTEXTEON;
-    property CouleurTexteOFF: TCouls read FcoulTEXTEOFF write FcoulTEXTEOFF;
     property EpaisseurBordure: integer read FEpaisseurBordure write SetEpaisseurBordure;
-    property TextSettings: TTextSettings read GetTextSettings write SetTextSettings;
+    property TextSettingsON: TTextSettings read GetTextSettingsON write SetTextSettingsON;
+    property TextSettingsOFF: TTextSettings read GetTextSettingsOFF write SetTextSettingsOFF;
   end;
 
 procedure Register;
@@ -57,14 +62,12 @@ constructor TPoussoir.Create(AOwner: TComponent);
 begin
   inherited;
   Fon := true;
-  FTexte := '';
-  FcoulBORD := Noir;
-  FcoulTEXTEON := Noir;
-  FcoulTEXTEOFF := Blanc;
+  FTexte := 'label';
   FcoulON := Vert;
   FcoulOFF := Gris;
   FEpaisseurBordure := 8;
-  FTextSettingsInfo := TTextSettingsInfo.Create(Self, GetTextSettingsClass);
+  FTextSettingsInfoON := TTextSettingsInfo.Create(Self, GetTextSettingsClassON);
+  FTextSettingsInfoOFF := TTextSettingsInfo.Create(Self, GetTextSettingsClassOFF);
 end;
 
 procedure TPoussoir.Paint;
@@ -90,7 +93,7 @@ begin
     bmp := TBitmap.Create(round(Width), round(Height));
 
     // dmax := sqrt(Bx * Bx + By * By);
-    dmax := Width / 2;
+    dmax := sqrt(Width * Width + Height * Height) / 3;
     if bmp.Map(TMapAccess.Write, dta) then
     begin
       r0 := 1;
@@ -102,10 +105,15 @@ begin
         for x := 0 to bmp.Width - 1 do
         begin
           d := sqrt((Ax - x) * (Ax - x) + (Ay - y) * (Ay - y)) / dmax;
+          if d > 1 then
+            d := 1;
           r := (r1 - r0) * d + r0;
           g := (g1 - g0) * d + g0;
           b := (b1 - b0) * d + b0;
           d := sqrt((Bx - x) * (Bx - x) + (By - y) * (By - y)) / dmax;
+          if d > 1 then
+            d := 1;
+
           ir := round(255 * ((r + (r1 - r0) * d + r0) / 2));
           if ir > 255 then
             ir := 255;
@@ -129,18 +137,22 @@ begin
       bmp.Unmap(dta);
     end;
     Canvas.DrawBitmap(bmp, rect, rect, 1);
-    Canvas.Fill.Color := setCoul(FcoulTEXTEON);;
+    Canvas.Font.Family := TextSettingsON.Font.Family;
+    Canvas.Font.Size := TextSettingsON.Font.Size;
+    Canvas.Fill.Color := TextSettingsON.FontColor;
+    Canvas.Font.Style := TextSettingsON.Font.Style;
+
   end
   else
   begin
     Canvas.Fill.Color := setCoul(FcoulOFF);
     Canvas.FillRect(rect, 0, 0, AllCorners, 1);
-    Canvas.Fill.Color := setCoul(FcoulTEXTEOFF);
+    Canvas.Font.Family := TextSettingsOFF.Font.Family;
+    Canvas.Font.Size := TextSettingsOFF.Font.Size;
+    Canvas.Fill.Color := TextSettingsOFF.FontColor;
+    Canvas.Font.Style := TextSettingsOFF.Font.Style;
+
   end;
-  Canvas.Font.Family:=TextSettings.Font.Family;
-  Canvas.Font.Size:=TextSettings.Font.Size;
-  Canvas.Fill.Color :=TextSettings.FontColor;
-  Canvas.Font.Style:=TextSettings.Font.Style;
 
   Canvas.FillText(rect, FTexte, true, 1, [], TTextAlign.Center, TTextAlign.Center);
   setLength(cadre, 11);
@@ -155,7 +167,8 @@ begin
   cadre[8] := TPointF.Create(Width - FEpaisseurBordure, FEpaisseurBordure);
   cadre[9] := cadre[5];
   cadre[10] := cadre[0];
-  Canvas.Fill.Color := setCoul(FcoulBORD);
+  // Canvas.Fill.Color := setCoul(FcoulBORD);
+  Canvas.Fill := Fill;
   Canvas.FillPolygon(cadre, 1);
   Canvas.EndScene;
 end;
@@ -172,22 +185,42 @@ begin
   Repaint;
 end;
 
-function TPoussoir.GetDefaultTextSettings: TTextSettings;
+function TPoussoir.GetDefaultTextSettingsON: TTextSettings;
 begin
-  Result := FTextSettingsInfo.DefaultTextSettings;
+  Result := FTextSettingsInfoON.DefaultTextSettings;
 end;
 
-function TPoussoir.GetTextSettings: TTextSettings;
+function TPoussoir.GetTextSettingsON: TTextSettings;
 begin
-  Result := FTextSettingsInfo.TextSettings;
+  Result := FTextSettingsInfoON.TextSettings;
 end;
 
-procedure TPoussoir.SetTextSettings(const Value: TTextSettings);
+procedure TPoussoir.SetTextSettingsON(const Value: TTextSettings);
 begin
-  FTextSettingsInfo.TextSettings.Assign(Value);
+  FTextSettingsInfoON.TextSettings.Assign(Value);
 end;
 
-function TPoussoir.GetTextSettingsClass: TTextSettingsInfo.TCustomTextSettingsClass;
+function TPoussoir.GetTextSettingsClassON: TTextSettingsInfo.TCustomTextSettingsClass;
+begin
+  Result := TTextControlTextSettings;
+end;
+
+function TPoussoir.GetDefaultTextSettingsOFF: TTextSettings;
+begin
+  Result := FTextSettingsInfoOFF.DefaultTextSettings;
+end;
+
+function TPoussoir.GetTextSettingsOFF: TTextSettings;
+begin
+  Result := FTextSettingsInfoOFF.TextSettings;
+end;
+
+procedure TPoussoir.SetTextSettingsOFF(const Value: TTextSettings);
+begin
+  FTextSettingsInfoOFF.TextSettings.Assign(Value);
+end;
+
+function TPoussoir.GetTextSettingsClassOFF: TTextSettingsInfo.TCustomTextSettingsClass;
 begin
   Result := TTextControlTextSettings;
 end;

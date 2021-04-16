@@ -5,7 +5,7 @@ interface
 uses System.UITypes;
 
 type
-  TCouls = (Rouge, Jaune, Vert, Orange, Bleu, Gris, GrisClair, GrisFonce, Blanc, Noir, Transparent, Custom);
+  TCouls = (Rouge, Jaune, Vert, VertFonce, Orange, Bleu, Gris, GrisClair, GrisFonce, Blanc, Noir, Transparent, Custom);
 
 function setCoul(tc: TCouls): TAlphaColor;
 procedure getRGBCoul(tc: TCouls; var r, g, b: Single);
@@ -19,6 +19,8 @@ begin
       result := $FFFF0000;
     Vert:
       result := $FF00FF00;
+    VertFonce:
+      result := $FF008000;
     Orange:
       result := $FFFF8000;
     Jaune:
@@ -53,6 +55,12 @@ begin
       begin
         r := 0;
         g := 1;
+        b := 0;
+      end;
+    VertFonce:
+      begin
+        r := 0;
+        g := 0.5;
         b := 0;
       end;
     Orange:
