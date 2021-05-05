@@ -151,17 +151,7 @@ end;
 procedure TDoubleCurseur.MouseDown(Button: TMouseButton; Shift: TShiftState; x, y: Single);
 begin
   // SELECTION DU CURSEUR
-  if Genre = Horizontal then
-  begin
-    if x <= Lcurs then
-      setValeur1(FValeur1 - 1);
-    if x >= Width - Lcurs then
-      setValeur2(FValeur2 + 1);
-    if (x > Lcurs) and (x < Width - Lcurs) then
-    begin
-      cursEnMain := getCurseurEnMain(x, y);
-    end;
-  end;
+  cursEnMain := getCurseurEnMain(x, y);
 end;
 
 procedure TDoubleCurseur.MouseMove(Shift: TShiftState; x, y: Single);
@@ -199,7 +189,23 @@ begin
   Canvas.FillRect(TRectF.Create(0, 0, Width, Height), 0, 0, AllCorners, 1, TCornerType.round);
   if FGenre = Vertical then
   begin
-
+    // Fond de glissière
+    Canvas.Fill.Color := ClaGray;
+    Canvas.FillRect(TRectF.Create(Width / 4, 0, 3 * Width / 4, Height), 0, 0, AllCorners, 1, TCornerType.round);
+    Canvas.Fill.Color := ClaBlack;
+    Canvas.FillRect(TRectF.Create(Width * (1 / 4 + 1 / 6), Lcurs, Width * (3 / 4 - 1 / 6), Height - Lcurs), 0, 0,
+      AllCorners, 1, TCornerType.round);
+    // Dessin des curseurs
+    Yc := getPosCurseur(FValeur1);
+    Canvas.Fill.Color := ClaGray;
+    Canvas.FillRect(TRectF.Create(0, Yc - Lcurs, Width, Yc + Lcurs), 0, 0, AllCorners, 1, TCornerType.round);
+    Canvas.Fill.Color := ClaBlue;
+    Canvas.FillRect(TRectF.Create(lCurs2, Yc - Lcurs2, Width-Lcurs2, Yc + Lcurs2), 0, 0, AllCorners, 1, TCornerType.round);
+    Yc := getPosCurseur(FValeur2);
+    Canvas.Fill.Color := ClaGray;
+    Canvas.FillRect(TRectF.Create(0, Yc - Lcurs, Width, Yc + Lcurs), 0, 0, AllCorners, 1, TCornerType.round);
+    Canvas.Fill.Color := ClaRed;
+    Canvas.FillRect(TRectF.Create(lCurs2, Yc - Lcurs2, Width-Lcurs2, Yc + Lcurs2), 0, 0, AllCorners, 1, TCornerType.round);
   end;
 
   if FGenre = Horizontal then
@@ -208,7 +214,7 @@ begin
     Canvas.Fill.Color := ClaGray;
     Canvas.FillRect(TRectF.Create(0, Height / 4, Width, 3 * Height / 4), 0, 0, AllCorners, 1, TCornerType.round);
     Canvas.Fill.Color := ClaBlack;
-    Canvas.FillRect(TRectF.Create(Lcurs, Height * (1 / 4 + 1 / 6), Width - 8, Height * (3 / 4 - 1 / 6)), 0, 0,
+    Canvas.FillRect(TRectF.Create(Lcurs, Height * (1 / 4 + 1 / 6), Width - Lcurs, Height * (3 / 4 - 1 / 6)), 0, 0,
       AllCorners, 1, TCornerType.round);
     // Dessin des curseurs
     Xc := getPosCurseur(FValeur1);
