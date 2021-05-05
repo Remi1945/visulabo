@@ -4,11 +4,13 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Types, FMX.Types, FMX.Controls, FMX.Objects, FMX.Graphics, System.UITypes,
-  System.UIConsts, System.Math.Vectors,Couleurs;
+  System.UIConsts, System.Math.Vectors,
+  Data.Bind.Components,System.Bindings.Outputs, System.rtti
+  ,Couleurs;
 
 type
 
-
+  [ObservableMember('Valeur')]
   TAffichage7Seg = class(TRectangle)
   private
     FcoulBORD, FcoulFOND, FcoulON, FcoulOFF: TCouls;
@@ -319,4 +321,11 @@ begin
   Repaint();
 end;
 
+initialization
+// FMX.Types.GlobalUseGPUCanvas := true;
+
+ Data.Bind.Components.RegisterObservableMember(TArray<TClass>.Create(TAffichage7Seg), 'Valeur', 'FMX');
+
+finalization
+ Data.Bind.Components.UnregisterObservableMember(TArray<TClass>.Create(TAffichage7Seg));
 end.

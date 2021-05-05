@@ -3,11 +3,13 @@ unit Led;
 interface
 
 uses
-  System.SysUtils,Couleurs, System.Classes, System.Types, System.UIConsts, FMX.Types, FMX.Controls, FMX.Objects, FMX.Graphics;
+  System.SysUtils,Couleurs, System.Classes, System.Types, System.UIConsts,
+  FMX.Types, FMX.Controls, FMX.Objects, FMX.Graphics,
+  Data.Bind.Components,System.Bindings.Outputs, System.rtti;
 
 type
 
-
+  [ObservableMember('LedOn')]
   TLed = class(TCircle)
   private
     FcoulON: TCouls;
@@ -76,5 +78,13 @@ begin
   FLedON := value;
   Repaint;
 end;
+
+initialization
+// FMX.Types.GlobalUseGPUCanvas := true;
+
+ Data.Bind.Components.RegisterObservableMember(TArray<TClass>.Create(TLed), 'LedOn', 'FMX');
+
+finalization
+ Data.Bind.Components.UnregisterObservableMember(TArray<TClass>.Create(TLed));
 
 end.

@@ -29,7 +29,9 @@ package packvisulabo;
 
 requires
   rtl,
-  fmx;
+  fmx,
+  bindengine,
+  bindcomp;
 
 contains
   Led in 'Led.pas',
@@ -44,6 +46,8 @@ contains
   Selecteur in 'Selecteur.pas',
   Interrupteur in 'Interrupteur.pas',
   Poussoir in 'Poussoir.pas',
-  TextControlTextSettings in 'TextControlTextSettings.pas';
+  TextControlTextSettings in 'TextControlTextSettings.pas',
+  TestFill in 'TestFill.pas',
+  DoubleCurseur in 'DoubleCurseur.pas';
 
 end.

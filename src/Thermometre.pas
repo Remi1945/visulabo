@@ -4,10 +4,12 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Types, FMX.Types, FMX.Controls, FMX.Objects, FMX.Graphics, System.UITypes,
-  System.UIConsts, System.Math.Vectors;
+  System.UIConsts, System.Math.Vectors,
+  Data.Bind.Components,System.Bindings.Outputs, System.rtti;
 
 type
 
+  [ObservableMember('Valeur')]
   TThermometre = class(TRectangle)
   private
     FUnite,FEtiquette, FFormatValeurs: String;
@@ -376,8 +378,13 @@ begin
   FMontreSeuils := Value;
 end;
 
-// initialization
-
+initialization
 // FMX.Types.GlobalUseGPUCanvas := true;
+
+ Data.Bind.Components.RegisterObservableMember(TArray<TClass>.Create(TThermometre), 'Valeur', 'FMX');
+
+finalization
+ Data.Bind.Components.UnregisterObservableMember(TArray<TClass>.Create(TThermometre));
+
 
 end.

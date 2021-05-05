@@ -4,11 +4,14 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Types, FMX.Types, FMX.Controls, FMX.Objects, FMX.Graphics, System.UITypes,
-  System.UIConsts, System.Math.Vectors, System.Math, TextControlTextSettings;
+  System.UIConsts, System.Math.Vectors, System.Math,
+  Data.Bind.Components,System.Bindings.Outputs, System.rtti,
+  TextControlTextSettings;
 
 type
   TGenre = (AiguilleTournante, CadranTournant);
 
+  [ObservableMember('Valeur')]
   TBoussole = class(TRectangle)
   private
     FValeur, FGraduationMajeure, FGraduationMineure: single;
@@ -301,8 +304,12 @@ begin
 end;
 
 
-// initialization
-
+initialization
 // FMX.Types.GlobalUseGPUCanvas := true;
+
+ Data.Bind.Components.RegisterObservableMember(TArray<TClass>.Create(TBoussole), 'Valeur', 'FMX');
+
+finalization
+ Data.Bind.Components.UnregisterObservableMember(TArray<TClass>.Create(TBoussole));
 
 end.

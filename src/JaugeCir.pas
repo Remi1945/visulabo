@@ -4,13 +4,15 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Types, FMX.Types, FMX.Controls, FMX.Objects, FMX.Graphics, System.UITypes,
-  System.UIConsts, System.Math.Vectors;
+  System.UIConsts, System.Math.Vectors,
+  Data.Bind.Components,System.Bindings.Outputs, System.rtti;
 
 type
   TGenre = (DemiCercle, Cercle, QuartDeCercleHautDroit, QuartDeCercleHautGauche, QuartDeCercleBasDroit,
     QuartDeCercleBasGauche);
   TCadran = (Blanc, DegradeNoirClair, DegradeNoirFonce,Custom);
 
+  [ObservableMember('Valeur')]
   TJaugeCir = class(TRectangle)
   private
     FFormatValeurs: String;
@@ -581,8 +583,12 @@ begin
   FMontreSeuils := Value;
 end;
 
-// initialization
-
+initialization
 // FMX.Types.GlobalUseGPUCanvas := true;
+
+ Data.Bind.Components.RegisterObservableMember(TArray<TClass>.Create(TJaugeCir), 'Valeur', 'FMX');
+
+finalization
+ Data.Bind.Components.UnregisterObservableMember(TArray<TClass>.Create(TJaugeCir));
 
 end.
