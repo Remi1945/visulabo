@@ -245,6 +245,7 @@ begin
     begin
       FValeur1 := FValeur2 - deltaV;
     end;
+    Repaint;
   end;
 end;
 
@@ -253,6 +254,7 @@ begin
   if (Value <= FMax) then
   begin
     FMin := Value;
+    Repaint;
   end;
 
 end;

@@ -1,14 +1,10 @@
 unit Thermometre;
-
 interface
-
 uses
   System.SysUtils, System.Classes, System.Types, FMX.Types, FMX.Controls, FMX.Objects, FMX.Graphics, System.UITypes,
   System.UIConsts, System.Math.Vectors,
   Data.Bind.Components,System.Bindings.Outputs, System.rtti;
-
 type
-
   [ObservableMember('Valeur')]
   TThermometre = class(TRectangle)
   private
@@ -16,7 +12,6 @@ type
     FMaxi, FMini, FValeur, FSeuil_A, FSeuil_B, FGraduationMajeure, FGraduationMineure: double;
     FMontreGraduationMajeure, FMontreGraduationMineure, FMontreValeurs, FMontreSeuils: boolean;
     FEpaisseurTube, FLgGrdMaj, FLgGrdMin: integer;
-
     procedure SetFormatValeurs(Value: String);
     procedure SetEtiquette(Value: String);
     procedure SetUnite(Value: String);
@@ -34,7 +29,6 @@ type
     procedure SetMontreGraduationMineure(Value: boolean);
     procedure SetMontreValeurs(Value: boolean);
     procedure SetMontreSeuils(Value: boolean);
-
   protected
     { Déclarations protégées }
   public
@@ -59,18 +53,13 @@ type
     property MontreGraduationMajeure: boolean read FMontreGraduationMajeure write SetMontreGraduationMajeure;
     property MontreValeurs: boolean read FMontreValeurs write SetMontreValeurs;
     property MontreSeuils: boolean read FMontreSeuils write SetMontreSeuils;
-
   end;
-
 procedure Register;
-
 implementation
-
 procedure Register;
 begin
   RegisterComponents('VisuLabo', [TThermometre]);
 end;
-
 procedure TThermometre.Paint;
 const
   marge: Single = 4;
@@ -94,15 +83,12 @@ var
   xg1, xg2, yg: Single;
   dta90,dta00:TBitmapData;
 begin
-
   Canvas.BeginScene;
-
   // Fond transparent
   br := TBrush.Create(TBrushKind.Solid, 0);
   rect := TRectF.Create(0, 0, Width, Height);
   Canvas.FillRect(rect, 0, 0, AllCorners, 100, br);
   br.Free;
-
   // Calcul de la hauteur et de la largeur max des étiquettes
   stMax := Format(FFormatValeurs, [Maxi]);
   stMin := Format(FFormatValeurs, [Mini]);
@@ -112,7 +98,6 @@ begin
   Wtxt := Canvas.TextWidth(stMax);
   if Canvas.TextWidth(stMin) > Wtxt then
     Wtxt := Canvas.TextWidth(stMin);
-
   if MontreSeuils then
   begin
     indxA := -1;
@@ -123,7 +108,6 @@ begin
   end;
   // Dessin du contour du thermometre
   Canvas.Stroke.Color := Stroke.Color;
-
   // Dessin des chiffres de graduation
   nbgradMaj := 2;
   nbgradMin := 0;
@@ -221,7 +205,6 @@ begin
     RectEcr.bottom := Htxt;
     BmpEtq.Width := round(Wtxt);
     BmpEtq.Height := round(Htxt);
-
     //Ecriture
     BmpEtq.Canvas.BeginScene;
     br := TBrush.Create(TBrushKind.Solid, 0);
@@ -231,7 +214,6 @@ begin
     BmpEtq.Canvas.Fill.Color:=$FF000000;
     BmpEtq.Canvas.FillText(RectEcr, st, false, 1, [], TTextAlign.Center, TTextAlign.Center);
     BmpEtq.Canvas.EndScene;
-
     // Rotation
     BmpEtq90 := TBitmap.Create;
     BmpEtq90.Width := round(Htxt);
@@ -256,7 +238,6 @@ begin
   end;
   Canvas.EndScene;
 end;
-
 constructor TThermometre.Create(AOwner: TComponent);
 begin
   inherited;
@@ -276,9 +257,7 @@ begin
   FEpaisseurTube := 16;
   FLgGrdMaj := 16;
   FLgGrdMin := 8;
-
 end;
-
 function TThermometre.HorsLimites: integer;
 begin
   if FValeur < FSeuil_A then
@@ -288,32 +267,26 @@ begin
   else
     result := 0;
 end;
-
 procedure TThermometre.SetFormatValeurs(Value: String);
 begin
   FFormatValeurs := Value;
 end;
-
 procedure TThermometre.SetEpaisseurTube(Value: integer);
 begin
   FEpaisseurTube := Value;
 end;
-
 procedure TThermometre.SetEtiquette(Value: String);
 begin
   FEtiquette := Value;
 end;
-
 procedure TThermometre.SetMaxi(Value: double);
 begin
   FMaxi := Value;
 end;
-
 procedure TThermometre.SetMini(Value: double);
 begin
   FMini := Value;
 end;
-
 procedure TThermometre.SetValeur(Value: double);
 begin
   if FValeur <> Value then
@@ -322,69 +295,54 @@ begin
     Repaint;
   end;
 end;
-
 procedure TThermometre.SetSeuil_A(Value: double);
 begin
   FSeuil_A := Value;
 end;
-
 procedure TThermometre.SetSeuil_B(Value: double);
 begin
   FSeuil_B := Value;
 end;
-
 procedure TThermometre.SetUnite(Value: String);
 begin
 FUnite:=Value;
 end;
-
 procedure TThermometre.SetGraduationMajeure(Value: double);
 begin
   FGraduationMajeure := Value;
 end;
-
 procedure TThermometre.SetGraduationMineure(Value: double);
 begin
   FGraduationMineure := Value;
 end;
-
 procedure TThermometre.SetLgGrdMaj(Value: integer);
 begin
   FLgGrdMaj := Value;
 end;
-
 procedure TThermometre.SetLgGrdMin(Value: integer);
 begin
   FLgGrdMin := Value;
 end;
-
 procedure TThermometre.SetMontreGraduationMajeure(Value: boolean);
 begin
   FMontreGraduationMajeure := Value;
 end;
-
 procedure TThermometre.SetMontreGraduationMineure(Value: boolean);
 begin
   FMontreGraduationMineure := Value;
 end;
-
 procedure TThermometre.SetMontreValeurs(Value: boolean);
 begin
   FMontreValeurs := Value;
 end;
-
 procedure TThermometre.SetMontreSeuils(Value: boolean);
 begin
   FMontreSeuils := Value;
 end;
-
 initialization
 // FMX.Types.GlobalUseGPUCanvas := true;
-
  Data.Bind.Components.RegisterObservableMember(TArray<TClass>.Create(TThermometre), 'Valeur', 'FMX');
-
 finalization
  Data.Bind.Components.UnregisterObservableMember(TArray<TClass>.Create(TThermometre));
-
 
 end.

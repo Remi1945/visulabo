@@ -1,15 +1,11 @@
 unit Affichage7Seg;
-
 interface
-
 uses
   System.SysUtils, System.Classes, System.Types, FMX.Types, FMX.Controls, FMX.Objects, FMX.Graphics, System.UITypes,
   System.UIConsts, System.Math.Vectors,
   Data.Bind.Components,System.Bindings.Outputs, System.rtti
   ,Couleurs;
-
 type
-
   [ObservableMember('Valeur')]
   TAffichage7Seg = class(TRectangle)
   private
@@ -34,16 +30,12 @@ type
     property NombreDeDigits: integer read FNbDigits write SetNbDigits;
     property Valeur: String read FValeur write SetValeur;
   end;
-
 procedure Register;
-
 implementation
-
 procedure Register;
 begin
   RegisterComponents('VisuLabo', [TAffichage7Seg]);
 end;
-
 constructor TAffichage7Seg.Create(AOwner: TComponent);
 begin
   inherited;
@@ -55,7 +47,6 @@ begin
   FcoulON:=Rouge;
   FcoulOFF:=Transparent;
 end;
-
 procedure TAffichage7Seg.Paint;
 var
   segs: array [1 .. 7] of TPolygon;
@@ -68,9 +59,7 @@ var
   br: TBrush;
   nbseg: integer;
 
-
 begin
-
   coulON := setCoul(FcoulON);
   coulOFF := setCoul(FcoulOFF);
   coulFOND := setCoul(FcoulFOND);
@@ -96,7 +85,6 @@ begin
   oy := (Height - h7) / 2;
   for k := 1 to 7 do
     setLength(segs[k], 7);
-
   segs[1][0] := TPointF.Create(b / 2 + c, b / 2);
   segs[1][1] := TPointF.Create(b + c, 0);
   segs[1][2] := TPointF.Create(b + c + a, 0);
@@ -148,8 +136,31 @@ begin
   k := 1;
   while k <= length(FValeur) do
   begin
-    if (FValeur[k] in ['0' .. '9']) and (nbseg < FNbDigits) then
+    if (FValeur[k] in ['+','-','0' .. '9']) and (nbseg < FNbDigits) then
     begin
+    if FValeur[k] = '-' then
+      begin // 123567 allumé 4 éteint
+        Canvas.Fill.Color := coulOFF;
+        Canvas.FillPolygon(segs[1], 1);
+        Canvas.FillPolygon(segs[2], 1);
+        Canvas.FillPolygon(segs[3], 1);
+        Canvas.FillPolygon(segs[5], 1);
+        Canvas.FillPolygon(segs[6], 1);
+        Canvas.FillPolygon(segs[7], 1);
+        Canvas.Fill.Color := coulON;
+        Canvas.FillPolygon(segs[4], 1);
+      end;
+      if FValeur[k] = '+' then
+      begin // 123567 allumé 4 éteint
+        Canvas.Fill.Color := coulOFF;
+        Canvas.FillPolygon(segs[1], 1);
+        Canvas.FillPolygon(segs[2], 1);
+        Canvas.FillPolygon(segs[3], 1);
+        Canvas.FillPolygon(segs[5], 1);
+        Canvas.FillPolygon(segs[6], 1);
+        Canvas.FillPolygon(segs[7], 1);
+        Canvas.FillPolygon(segs[4], 1);
+      end;
       if FValeur[k] = '0' then
       begin // 123567 allumé 4 éteint
         Canvas.Fill.Color := coulON;
@@ -298,34 +309,27 @@ begin
             0, AllCorners, 1);
         end;
       end;
-
     end;
     inc(k);
   end;
   Canvas.EndScene;
 end;
-
 procedure TAffichage7Seg.SetEpaisseurBordure(Value: integer);
 begin
   FEpaisseurBordure := Value;
 end;
-
 procedure TAffichage7Seg.SetNbDigits(Value: integer);
 begin
   FNbDigits := Value;
 end;
-
 procedure TAffichage7Seg.SetValeur(Value: string);
 begin
   FValeur := Value;
   Repaint();
 end;
-
 initialization
 // FMX.Types.GlobalUseGPUCanvas := true;
-
  Data.Bind.Components.RegisterObservableMember(TArray<TClass>.Create(TAffichage7Seg), 'Valeur', 'FMX');
-
 finalization
  Data.Bind.Components.UnregisterObservableMember(TArray<TClass>.Create(TAffichage7Seg));
 end.
