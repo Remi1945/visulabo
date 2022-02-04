@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{AC55C89E-C530-4276-8E0B-DAB76F3D10A0}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="packvisulabo.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="C:\Users\remie\Documents\Embarcadero\Studio\Projets\testvisulabo\testvisulabo.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="packvisulabo">
+        <MSBuild Projects="packvisulabo.dproj"/>
+    </Target>
+    <Target Name="packvisulabo:Clean">
+        <MSBuild Projects="packvisulabo.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="packvisulabo:Make">
+        <MSBuild Projects="packvisulabo.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="testvisulabo">
+        <MSBuild Projects="C:\Users\remie\Documents\Embarcadero\Studio\Projets\testvisulabo\testvisulabo.dproj"/>
+    </Target>
+    <Target Name="testvisulabo:Clean">
+        <MSBuild Projects="C:\Users\remie\Documents\Embarcadero\Studio\Projets\testvisulabo\testvisulabo.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="testvisulabo:Make">
+        <MSBuild Projects="C:\Users\remie\Documents\Embarcadero\Studio\Projets\testvisulabo\testvisulabo.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="packvisulabo;testvisulabo"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="packvisulabo:Clean;testvisulabo:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="packvisulabo:Make;testvisulabo:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
