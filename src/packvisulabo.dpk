@@ -1,5 +1,4 @@
 package packvisulabo;
-
 {$R *.res}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
 {$ALIGN 8}
@@ -29,9 +28,7 @@ package packvisulabo;
 
 requires
   rtl,
-  fmx,
-  bindengine,
-  bindcomp;
+  fmx;
 
 contains
   Led in 'Led.pas',
@@ -47,7 +44,8 @@ contains
   Interrupteur in 'Interrupteur.pas',
   Poussoir in 'Poussoir.pas',
   TextControlTextSettings in 'TextControlTextSettings.pas',
-  TestFill in 'TestFill.pas',
+  PropLayout in 'PropLayout.pas',
+  JaugeRect in 'JaugeRect.pas',
   DoubleCurseur in 'DoubleCurseur.pas';
 
 end.

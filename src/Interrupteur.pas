@@ -3,7 +3,8 @@ unit Interrupteur;
 interface
 
 uses
-  System.SysUtils, Couleurs, System.Classes, System.Types, System.UIConsts, FMX.Types, FMX.Controls, FMX.Objects,
+  System.SysUtils, Couleurs, System.Classes, System.Types, System.UIConsts,
+  FMX.Types, FMX.Controls, FMX.Objects,
   FMX.Graphics, System.Math.Vectors;
 
 type
@@ -19,9 +20,10 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     procedure Paint; override;
+    procedure setContact(value: boolean);
   published
     property Genre: TGenre read FGenre write FGenre;
-    property Contacte: boolean read Fon write Fon;
+    property Contacte: boolean read Fon write SetContact;
   end;
 
 procedure Register;
@@ -85,6 +87,12 @@ begin
 
   end;
   Canvas.EndScene;
+end;
+
+procedure TInterrupteur.SetContact(value: boolean);
+begin
+  Fon := value;
+  Repaint;
 end;
 
 end.

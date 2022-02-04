@@ -3,25 +3,24 @@ unit Led;
 interface
 
 uses
-  System.SysUtils,Couleurs, System.Classes, System.Types, System.UIConsts,
-  FMX.Types, FMX.Controls, FMX.Objects, FMX.Graphics,
-  Data.Bind.Components,System.Bindings.Outputs, System.rtti;
+  System.SysUtils, Couleurs, System.Classes, System.Types, System.UIConsts,
+  FMX.Types, FMX.Controls, FMX.Objects, FMX.Graphics;
 
 type
 
-  [ObservableMember('LedOn')]
   TLed = class(TCircle)
   private
     FcoulON: TCouls;
     FLedON: boolean;
     procedure setLedON(value: boolean);
+    procedure setCoulON(value: TCouls);
   protected
     { Déclarations protégées }
   public
     constructor Create(AOwner: TComponent); override;
     procedure Paint; override;
   published
-    property CouleurON: TCouls read FcoulON write FcoulON;
+    property CouleurON: TCouls read FcoulON write setCoulON;
     property ledON: boolean read FLedON write setLedON default true;
   end;
 
@@ -73,18 +72,16 @@ begin
   Canvas.EndScene;
 end;
 
+procedure TLed.setCoulON(value: TCouls);
+begin
+  FcoulON := value;
+  Repaint;
+end;
+
 procedure TLed.setLedON(value: boolean);
 begin
   FLedON := value;
   Repaint;
 end;
-
-initialization
-// FMX.Types.GlobalUseGPUCanvas := true;
-
- Data.Bind.Components.RegisterObservableMember(TArray<TClass>.Create(TLed), 'LedOn', 'FMX');
-
-finalization
- Data.Bind.Components.UnregisterObservableMember(TArray<TClass>.Create(TLed));
 
 end.
