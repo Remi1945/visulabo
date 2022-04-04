@@ -44,7 +44,7 @@ end;
 
 procedure TInterrupteur.Paint;
 var
-  rect: TRectF;
+
   pas: Single;
   pol: TPolygon;
   L1, L2: Single;

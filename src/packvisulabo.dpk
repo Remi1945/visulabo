@@ -46,6 +46,7 @@ contains
   TextControlTextSettings in 'TextControlTextSettings.pas',
   PropLayout in 'PropLayout.pas',
   JaugeRect in 'JaugeRect.pas',
-  DoubleCurseur in 'DoubleCurseur.pas';
+  DoubleCurseur in 'DoubleCurseur.pas',
+  PointInteret in 'PointInteret.pas';
 
 end.

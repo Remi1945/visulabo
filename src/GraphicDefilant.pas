@@ -94,7 +94,7 @@ procedure TGraphicDefilant.Paint;
 const
   marge = 4;
 var
-  i, j: integer;
+  i: integer;
   stYmin, stYmax, stXmin, stXmax, st: String;
   HXtxt, LYtxt: Single;
   HYtxt1, HYtxt0, LXtxt1, LXtxt0: Single;

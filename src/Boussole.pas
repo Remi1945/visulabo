@@ -61,17 +61,17 @@ end;
 
 procedure TBoussole.Paint;
 var
-  rect, RectEcr: TRectF;
-  decr: double;
+  rect: TRectF;
+
   st: String;
   Wtxt, Htxt: single;
   Xc, Yc, Xe, Ye: single;
   xalpha, yalpha, alpha: single;
   br: TBrush;
-  pen: TStrokeBrush;
+
   aiguille: TPolygon;
   i, j: integer;
-  angle, dalpha, grad: double;
+  dalpha, grad: double;
   tailleF, x, y, x1, x2, y1, y2: single;
   nbgradMaj, nbgradMin: integer;
   xecr, yecr: single;

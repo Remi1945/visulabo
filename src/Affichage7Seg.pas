@@ -63,7 +63,7 @@ var
   a, b, c, d, w7, h7, wd, wmax: single;
   deltax, ox, oy: single;
   coulFOND, coulBORD, coulON, coulOFF: TAlphaColor;
-  br: TBrush;
+
   nbseg: integer;
 
 

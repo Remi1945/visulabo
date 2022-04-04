@@ -176,7 +176,7 @@ end;
 
 procedure TSelecteur.Paint;
 var
-  rect: TRectF;
+
 
   i: integer;
   xg, yg, Yc, Xc, dxg, dyg: Single;

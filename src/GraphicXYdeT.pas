@@ -1,10 +1,12 @@
 unit GraphicXYdeT;
 
+
 interface
 
 uses
-  System.SysUtils, Couleurs, TextControlTextSettings, System.Classes, System.Types, FMX.Types, FMX.Controls,
-  FMX.Graphics, FMX.Objects, System.UITypes, System.UIConsts;
+  System.SysUtils, Couleurs, TextControlTextSettings, System.Classes,
+  System.Types, FMX.Types, FMX.Controls,
+  FMX.Graphics, FMX.Objects, System.UITypes, System.UIConsts, PointInteret;
 
 type
 
@@ -23,6 +25,7 @@ type
     FNbValeurs: integer;
     FEchelleAuto: boolean;
     FZone: boolean;
+    FMontrePI: boolean;
     FCarre: boolean;
     FAxe: boolean;
     FGrille: boolean;
@@ -33,6 +36,8 @@ type
     FGraduationMajeure, FGraduationMineure: double;
     FLgGrdMaj, FLgGrdMin: integer;
     FTextSettingsInfo: TTextSettingsInfo;
+    Fsurligne: integer;
+    listePI: TList;
 
     procedure SetUniteX(Value: String);
     procedure SetUniteY(Value: String);
@@ -53,6 +58,7 @@ type
     procedure SetTitre(Value: String);
     procedure SetZone(Value: boolean);
     procedure SetNbValeurs(nb: integer);
+    procedure SetSurlignage(num: integer);
     procedure SetGraduationMajeure(Value: double);
     procedure SetGraduationMineure(Value: double);
     procedure SetLgGrdMaj(Value: integer);
@@ -67,6 +73,8 @@ type
     constructor Create(AOwner: TComponent); override;
     procedure Paint; override;
     procedure AjouteValeur(valx, valy: double; redessine: boolean); overload;
+    procedure AjoutePI(xPi: TPi; redessine: boolean);
+    procedure EffacePI(redessine: boolean);
   published
     property CouleurDernierPoint: TCouls read FcoulDerPts write FcoulDerPts;
     property CouleurAxe: TCouls read FcoulAxe write FcoulAxe;
@@ -92,12 +100,19 @@ type
     property AfficheAxe: boolean read FAxe write SetAxe;
     property AfficheGrille: boolean read FGrille write SetGrille;
     property AfficheZone: boolean read FZone write SetZone;
+    property AffichePI: boolean read FMontrePI write FMontrePI;
     property Titre: String read FTitre write SetTitre;
-    property GraduationMajeure: double read FGraduationMajeure write SetGraduationMajeure;
-    property GraduationMineure: double read FGraduationMineure write SetGraduationMineure;
-    property LongueurGraduationMajeure: integer read FLgGrdMaj write SetLgGrdMaj;
-    property LongueurGraduationMineure: integer read FLgGrdMin write SetLgGrdMin;
-    property TextSettings: TTextSettings read GetTextSettings write SetTextSettings;
+    property GraduationMajeure: double read FGraduationMajeure
+      write SetGraduationMajeure;
+    property GraduationMineure: double read FGraduationMineure
+      write SetGraduationMineure;
+    property LongueurGraduationMajeure: integer read FLgGrdMaj
+      write SetLgGrdMaj;
+    property LongueurGraduationMineure: integer read FLgGrdMin
+      write SetLgGrdMin;
+    property TextSettings: TTextSettings read GetTextSettings
+      write SetTextSettings;
+    property Surlignage: integer read Fsurligne write SetSurlignage;
   end;
 
 procedure Register;
@@ -120,6 +135,7 @@ begin
   FFormatX := '%3.2f';
   FFormatY := '%3.2f';
   FEchelleAuto := true;
+  FMontrePI := false;
   FminX := -1;
   FmaxX := 1;
   FminY := -1;
@@ -138,9 +154,9 @@ begin
   FGraduationMineure := 0.1;
   FLgGrdMaj := 16;
   FLgGrdMin := 8;
-
+  listePI := TList.Create;
   FTextSettingsInfo := TTextSettingsInfo.Create(Self, GetTextSettingsClass);
-
+  FSurligne:=-1;
   FNbValeurs := 200;
   for i := 0 to FNbValeurs - 1 do
   begin
@@ -149,22 +165,38 @@ begin
   end;
 end;
 
+procedure TGraphicXYdeT.EffacePI(redessine: boolean);
+var
+  xPi: TPi;
+begin
+  while listePI.Count > 0 do
+  begin
+    xPi := listePI.Items[0];
+    listePI.Delete(0);
+    xPi.Free;
+  end;
+
+  if redessine then
+    Repaint;
+end;
+
 procedure TGraphicXYdeT.Paint;
 const
   marge = 4;
 var
   i, j: integer;
   stYmin, stYmax, stXmin, stXmax, st: String;
-  HXtxt, LYtxt: Single;
+  wt,ht,HXtxt, LYtxt: Single;
   HYtxt1, HYtxt0, LXtxt1, LXtxt0: Single;
   Ay, Ax, Ox, Oy, By, Bx, Gx, Gy: Single;
   x0, y0, x1, y1: Single;
   dx, dy: Single;
   rect: TRectF;
   p0, p1: TPointF;
-  Xc: Single;
-  Yc: Single;
+  Xc, Yc, xPi, ypi: Single;
   a, b, c: integer;
+  lePI: TPi;
+
 
   procedure ValToPoint(v_x, v_y: Single; var px, py: Single);
   var
@@ -295,7 +327,8 @@ begin
     Canvas.DrawLine(TPointF.Create(Ox, Gy), TPointF.Create(Bx, Gy), 1);
     if FGraduationMajeure > 0 then
     begin
-      if (FGraduationMajeure > FGraduationMineure) and (FGraduationMineure > 0) then
+      if (FGraduationMajeure > FGraduationMineure) and (FGraduationMineure > 0)
+      then
         c := trunc(FGraduationMajeure / FGraduationMineure)
       else
         c := 0;
@@ -307,11 +340,14 @@ begin
       for i := a to b do
       begin
         ValToPoint(Xc + i * FGraduationMajeure, Yc, x1, y1);
-        Canvas.DrawLine(TPointF.Create(x1, Gy - FLgGrdMaj / 2), TPointF.Create(x1, Gy + FLgGrdMaj / 2), 1);
+        Canvas.DrawLine(TPointF.Create(x1, Gy - FLgGrdMaj / 2),
+          TPointF.Create(x1, Gy + FLgGrdMaj / 2), 1);
         for j := 1 to c do
         begin
-          ValToPoint(Xc + i * FGraduationMajeure + j * FGraduationMineure, Yc, x1, y1);
-          Canvas.DrawLine(TPointF.Create(x1, Gy - FLgGrdMin / 2), TPointF.Create(x1, Gy + FLgGrdMin / 2), 1);
+          ValToPoint(Xc + i * FGraduationMajeure + j * FGraduationMineure,
+            Yc, x1, y1);
+          Canvas.DrawLine(TPointF.Create(x1, Gy - FLgGrdMin / 2),
+            TPointF.Create(x1, Gy + FLgGrdMin / 2), 1);
         end;
       end;
 
@@ -321,11 +357,14 @@ begin
       for i := a to b do
       begin
         ValToPoint(Xc, Yc + i * FGraduationMajeure, x1, y1);
-        Canvas.DrawLine(TPointF.Create(Gx - FLgGrdMaj / 2, y1), TPointF.Create(Gx + FLgGrdMaj / 2, y1), 1);
+        Canvas.DrawLine(TPointF.Create(Gx - FLgGrdMaj / 2, y1),
+          TPointF.Create(Gx + FLgGrdMaj / 2, y1), 1);
         for j := 1 to c do
         begin
-          ValToPoint(Xc, Yc + i * FGraduationMajeure + j * FGraduationMineure, x1, y1);
-          Canvas.DrawLine(TPointF.Create(Gx - FLgGrdMin / 2, y1), TPointF.Create(Gx + FLgGrdMin / 2, y1), 1);
+          ValToPoint(Xc, Yc + i * FGraduationMajeure + j *
+            FGraduationMineure, x1, y1);
+          Canvas.DrawLine(TPointF.Create(Gx - FLgGrdMin / 2, y1),
+            TPointF.Create(Gx + FLgGrdMin / 2, y1), 1);
         end;
       end;
     end;
@@ -343,7 +382,48 @@ begin
     Canvas.DrawLine(TPointF.Create(x0, y0), TPointF.Create(x1, y1), 1);
     ValToPoint(ZminX, ZminY, x1, y1);
     Canvas.DrawLine(TPointF.Create(x0, y0), TPointF.Create(x1, y1), 1);
+  end;
+  if FMontrePI then
+  begin
+    for i:=0 to listePI.Count-1 do
+    begin
+      lePI:=TPi(listePI[i]);
+      st:=lePI.montexte;
+      wt:=Canvas.TextWidth(st);
+      ht:=Canvas.TextHeight(st);
+      ValToPoint(lePI.X, lePI.Y, xPi, ypi);
+      Canvas.Fill.Color:=lePI.Couleur;
+      Canvas.FillText(TRectF.Create(xpi+lePi.taille,ypi-lePi.taille,xpi+wt+lePi.taille,ypi+ht-lePi.taille), st, false, 1, [], TTextAlign.Center,
+    TTextAlign.Center);
 
+      Canvas.Stroke.Color := lePI.Couleur;
+      case lePI.maForme of
+        FrmCarre:
+          Canvas.DrawRect(TRectF.Create(xPi - lePI.taille / 2,
+            ypi - lePI.taille / 2, xPi + lePI.taille / 2, ypi + lePI.taille / 2),
+            0, 0, AllCorners, 1);
+        FrmCercle:
+          begin
+            Canvas.DrawEllipse(TRectF.Create(xPi - lePI.taille / 2,
+              ypi - lePI.taille / 2, xPi + lePI.taille / 2,
+              ypi + lePI.taille / 2), 1);
+            if Fsurligne=i then
+              begin
+              Canvas.FillEllipse(TRectF.Create(xPi - lePI.taille / 2,
+              ypi - lePI.taille / 2, xPi + lePI.taille / 2,
+              ypi + lePI.taille / 2), 1);
+              end;
+          end;
+        FrmX:
+          begin
+
+          end;
+        FrmCroix:
+          begin
+          end;
+
+      end;
+    end;
   end;
   // Ecriture des textes
   rect.Left := marge;
@@ -352,19 +432,23 @@ begin
   rect.Bottom := rect.Top + HYtxt1;
   Canvas.Fill.Color := TextSettings.FontColor;
 
-  Canvas.FillText(rect, stYmax, false, 1, [], TTextAlign.Center, TTextAlign.Center);
+  Canvas.FillText(rect, stYmax, false, 1, [], TTextAlign.Center,
+    TTextAlign.Center);
 
   rect.SetLocation(marge, Oy - HYtxt0 / 2);
-  Canvas.FillText(rect, stYmin, false, 1, [], TTextAlign.Leading, TTextAlign.Center);
+  Canvas.FillText(rect, stYmin, false, 1, [], TTextAlign.Leading,
+    TTextAlign.Center);
 
   rect.SetLocation(Ox - LXtxt0 / 2, Oy + marge);
   rect.Width := LXtxt0;
-  Canvas.FillText(rect, stXmin, false, 1, [], TTextAlign.Center, TTextAlign.Center);
+  Canvas.FillText(rect, stXmin, false, 1, [], TTextAlign.Center,
+    TTextAlign.Center);
   rect.SetLocation(Bx - LXtxt1 / 2, Oy + marge);
   rect.Width := LXtxt1;
-  Canvas.FillText(rect, stXmax, false, 1, [], TTextAlign.Center, TTextAlign.Center);
-  st := FTitre + '[' + Format(FormatX, [ValeursX[FNbValeurs - 1]]) + UniteX + ' , ' +
-    Format(FormatY, [ValeursY[FNbValeurs - 1]]) + UniteY + ']';
+  Canvas.FillText(rect, stXmax, false, 1, [], TTextAlign.Center,
+    TTextAlign.Center);
+  st := FTitre + '[' + Format(FormatX, [ValeursX[FNbValeurs - 1]]) + UniteX +
+    ' , ' + Format(FormatY, [ValeursY[FNbValeurs - 1]]) + UniteY + ']';
   rect.Left := (Ox + Bx) / 2 - Canvas.TextWidth(st) / 2;
   rect.Right := rect.Left + Canvas.TextWidth(st);
   Canvas.FillText(rect, st, false, 1, [], TTextAlign.Center, TTextAlign.Center);
@@ -486,6 +570,15 @@ begin
     FNbValeurs := nb;
 end;
 
+procedure TGraphicXYdeT.SetSurlignage(num: integer);
+begin
+  if (num >= 0) and (num < listePI.Count) then
+    Fsurligne := num
+  else
+    Fsurligne := -1;
+  Repaint;
+end;
+
 procedure TGraphicXYdeT.SetLgGrdMaj(Value: integer);
 begin
   FLgGrdMaj := Value;
@@ -497,6 +590,13 @@ begin
 end;
 
 // ---------------------------------------------------------------------------
+procedure TGraphicXYdeT.AjoutePI(xPi: TPi; redessine: boolean);
+begin
+  listePI.Add(xPi);
+  if redessine then
+    Repaint;
+end;
+
 procedure TGraphicXYdeT.AjouteValeur(valx, valy: double; redessine: boolean);
 var
   i: integer;
@@ -576,9 +676,11 @@ begin
   FTextSettingsInfo.TextSettings.Assign(Value);
 end;
 
-function TGraphicXYdeT.GetTextSettingsClass: TTextSettingsInfo.TCustomTextSettingsClass;
+function TGraphicXYdeT.GetTextSettingsClass
+  : TTextSettingsInfo.TCustomTextSettingsClass;
 begin
   result := TTextControlTextSettings;
 end;
 
 end.
+
