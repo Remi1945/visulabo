@@ -4,25 +4,23 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Types, FMX.Types, FMX.Controls,
-  FMX.Objects, FMX.Graphics, System.UITypes,
+  FMX.Objects, FMX.Graphics, System.UITypes, Couleurs,
   System.UIConsts, System.Math.Vectors;
 
 type
-  TGenre = (DemiCercle, Cercle, QuartDeCercleHautDroit, QuartDeCercleHautGauche,
-    QuartDeCercleBasDroit, QuartDeCercleBasGauche);
+  TGenre = (DemiCercle, Cercle, QuartDeCercleHautDroit, QuartDeCercleHautGauche, QuartDeCercleBasDroit,
+    QuartDeCercleBasGauche);
   TCadran = (Blanc, DegradeNoirClair, DegradeNoirFonce, Custom);
 
   TJaugeCir = class(TRectangle)
   private
     FFormatValeurs: String;
-    FMaxi, FMini, FValeur, FSeuil_A, FSeuil_B, FGraduationMajeure,
-      FGraduationMineure: double;
-    FMontreGraduationMajeure, FMontreGraduationMineure, FMontreValeurs,
-      FMontreSeuils: boolean;
-    FEpaisseurBordure, FEpaisseurSeuil, FLgGrdMaj, FLgGrdMin,
-      FGenreSeuil: integer;
+    FMaxi, FMini, FValeur, FSeuil_A, FSeuil_B, FGraduationMajeure, FGraduationMineure: double;
+    FMontreGraduationMajeure, FMontreGraduationMineure, FMontreValeurs, FMontreSeuils: boolean;
+    FEpaisseurBordure, FEpaisseurSeuil, FLgGrdMaj, FLgGrdMin, FGenreSeuil: integer;
     FGenre: TGenre;
     FCadran: TCadran;
+    FAspectBordure: TMatiere;
     procedure SetFormatValeurs(Value: String);
     procedure SetGenreSeuil(Value: integer);
     procedure SetEpaisseurBordure(Value: integer);
@@ -40,8 +38,7 @@ type
     procedure SetMontreGraduationMineure(Value: boolean);
     procedure SetMontreValeurs(Value: boolean);
     procedure SetMontreSeuils(Value: boolean);
-    function dessineBordure(lrg, htr: integer; gnr: TGenre;
-      Xc, Yc, Rx, Ry: Single): TBitmap;
+    function dessineBordure(mat: TMatiere; lrg, htr: integer; gnr: TGenre; Xc, Yc, Rx, Ry: Single): TBitmap;
   protected
     { Déclarations protégées }
   public
@@ -53,27 +50,20 @@ type
     property Genre: TGenre read FGenre write FGenre;
     property Cadran: TCadran read FCadran write FCadran;
     property GenreSeuil: integer read FGenreSeuil write SetGenreSeuil;
-    property EpaisseurBordure: integer read FEpaisseurBordure
-      write SetEpaisseurBordure;
-    property EpaisseurSeuil: integer read FEpaisseurSeuil
-      write SetEpaisseurSeuil;
-    property LongueurGraduationMajeure: integer read FLgGrdMaj
-      write SetLgGrdMaj;
-    property LongueurGraduationMineure: integer read FLgGrdMin
-      write SetLgGrdMin;
+    property EpaisseurBordure: integer read FEpaisseurBordure write SetEpaisseurBordure;
+    property AspectBordure: TMatiere read FAspectBordure write FAspectBordure;
+    property EpaisseurSeuil: integer read FEpaisseurSeuil write SetEpaisseurSeuil;
+    property LongueurGraduationMajeure: integer read FLgGrdMaj write SetLgGrdMaj;
+    property LongueurGraduationMineure: integer read FLgGrdMin write SetLgGrdMin;
     property Maxi: double read FMaxi write SetMaxi;
     property Mini: double read FMini write SetMini;
     property Valeur: double read FValeur write SetValeur;
     property Seuil_A: double read FSeuil_A write SetSeuil_A;
     property Seuil_B: double read FSeuil_B write SetSeuil_B;
-    property GraduationMajeure: double read FGraduationMajeure
-      write SetGraduationMajeure;
-    property GraduationMineure: double read FGraduationMineure
-      write SetGraduationMineure;
-    property MontreGraduationMineure: boolean read FMontreGraduationMineure
-      write SetMontreGraduationMineure;
-    property MontreGraduationMajeure: boolean read FMontreGraduationMajeure
-      write SetMontreGraduationMajeure;
+    property GraduationMajeure: double read FGraduationMajeure write SetGraduationMajeure;
+    property GraduationMineure: double read FGraduationMineure write SetGraduationMineure;
+    property MontreGraduationMineure: boolean read FMontreGraduationMineure write SetMontreGraduationMineure;
+    property MontreGraduationMajeure: boolean read FMontreGraduationMajeure write SetMontreGraduationMajeure;
     property MontreValeurs: boolean read FMontreValeurs write SetMontreValeurs;
     property MontreSeuils: boolean read FMontreSeuils write SetMontreSeuils;
 
@@ -178,10 +168,10 @@ begin
       end;
     QuartDeCercleHautDroit:
       begin
-        Xc := Wtxt+ EpaisseurBordure;
-        Yc := Height - Htxt- EpaisseurBordure;
-        Rx := Width - marge - Wtxt - 2*EpaisseurBordure;
-        Ry := Height - marge - Htxt - 2*EpaisseurBordure;
+        Xc := Wtxt + EpaisseurBordure;
+        Yc := Height - Htxt - EpaisseurBordure;
+        Rx := Width - marge - Wtxt - 2 * EpaisseurBordure;
+        Ry := Height - marge - Htxt - 2 * EpaisseurBordure;
         alpha0 := 0;
         alpha1 := Pi / 2;
         setLength(Cadran, 5 + Ns);
@@ -194,16 +184,16 @@ begin
           Cadran[i] := TPointF.Create(x, y);
         end;
         Cadran[Ns + 1] := TPointF.Create(EpaisseurBordure, Cadran[Ns].y);
-        Cadran[Ns + 2] := TPointF.Create(EpaisseurBordure, Height- EpaisseurBordure);
-        Cadran[Ns + 3] := TPointF.Create(Xc + Rx, Height- EpaisseurBordure);
+        Cadran[Ns + 2] := TPointF.Create(EpaisseurBordure, Height - EpaisseurBordure);
+        Cadran[Ns + 3] := TPointF.Create(Xc + Rx, Height - EpaisseurBordure);
         Cadran[Ns + 4] := Cadran[0];
       end;
     QuartDeCercleHautGauche:
       begin
-        Xc := Width - Wtxt- EpaisseurBordure;
-        Yc := Height - Htxt- EpaisseurBordure;
-        Rx := Width - marge - Wtxt - 2*EpaisseurBordure;
-        Ry := Height - marge - Htxt - 2*EpaisseurBordure;
+        Xc := Width - Wtxt - EpaisseurBordure;
+        Yc := Height - Htxt - EpaisseurBordure;
+        Rx := Width - marge - Wtxt - 2 * EpaisseurBordure;
+        Ry := Height - marge - Htxt - 2 * EpaisseurBordure;
         alpha0 := Pi;
         alpha1 := Pi / 2;
         setLength(Cadran, 5 + Ns);
@@ -215,17 +205,17 @@ begin
           y := Yc - sin(angle) * Ry;
           Cadran[i] := TPointF.Create(x, y);
         end;
-        Cadran[Ns + 1] := TPointF.Create(Width- EpaisseurBordure, Cadran[Ns].y);
-        Cadran[Ns + 2] := TPointF.Create(Width- EpaisseurBordure, Height- EpaisseurBordure);
-        Cadran[Ns + 3] := TPointF.Create(Cadran[0].x, Height- EpaisseurBordure);
+        Cadran[Ns + 1] := TPointF.Create(Width - EpaisseurBordure, Cadran[Ns].y);
+        Cadran[Ns + 2] := TPointF.Create(Width - EpaisseurBordure, Height - EpaisseurBordure);
+        Cadran[Ns + 3] := TPointF.Create(Cadran[0].x, Height - EpaisseurBordure);
         Cadran[Ns + 4] := Cadran[0];
       end;
     QuartDeCercleBasGauche:
       begin
-        Xc := Width - Wtxt-EpaisseurBordure;
-        Yc := Htxt+EpaisseurBordure;
-        Rx := Width - marge - Wtxt - 2*EpaisseurBordure;
-        Ry := Height - marge - Htxt - 2*EpaisseurBordure;
+        Xc := Width - Wtxt - EpaisseurBordure;
+        Yc := Htxt + EpaisseurBordure;
+        Rx := Width - marge - Wtxt - 2 * EpaisseurBordure;
+        Ry := Height - marge - Htxt - 2 * EpaisseurBordure;
         alpha0 := 3 * Pi / 2;
         alpha1 := Pi;
         setLength(Cadran, 5 + Ns);
@@ -238,8 +228,8 @@ begin
           Cadran[i] := TPointF.Create(x, y);
         end;
         Cadran[Ns + 1] := TPointF.Create(Cadran[Ns].x, EpaisseurBordure);
-        Cadran[Ns + 2] := TPointF.Create(Width-EpaisseurBordure, EpaisseurBordure);
-        Cadran[Ns + 3] := TPointF.Create(Width-EpaisseurBordure, Cadran[0].y);
+        Cadran[Ns + 2] := TPointF.Create(Width - EpaisseurBordure, EpaisseurBordure);
+        Cadran[Ns + 3] := TPointF.Create(Width - EpaisseurBordure, Cadran[0].y);
         Cadran[Ns + 4] := Cadran[0];
       end;
     QuartDeCercleBasDroit:
@@ -266,12 +256,10 @@ begin
       end;
   end;
   // Dessin de la bordure
-  if FEpaisseurBordure > 0 then
+  if (FEpaisseurBordure > 0) and (FAspectBordure <> MAT_SANS) then
   begin
-    Bordure := dessineBordure(round(Width), round(Height), FGenre, Xc,
-      Yc, Rx, Ry);
-    Canvas.DrawBitmap(Bordure, TRectF.Create(0, 0, Width, Height),
-      TRectF.Create(0, 0, Width, Height), 1, true);
+    Bordure := dessineBordure(FAspectBordure,round(Width), round(Height), FGenre, Xc, Yc, Rx, Ry);
+    Canvas.DrawBitmap(Bordure, TRectF.Create(0, 0, Width, Height), TRectF.Create(0, 0, Width, Height), 1, true);
     Bordure.Free;
   end;
 
@@ -327,8 +315,7 @@ begin
     indxA := -1;
     indxB := -1;
 
-    if (Seuil_A > Mini) and (Seuil_A < Maxi) and (Seuil_B > Mini) and
-      (Seuil_B < Maxi) and (Seuil_A < Seuil_B) then
+    if (Seuil_A > Mini) and (Seuil_A < Maxi) and (Seuil_B > Mini) and (Seuil_B < Maxi) and (Seuil_A < Seuil_B) then
     begin
       // Coloration de mini à seuil A
       indxA := round((Seuil_A - Mini) / (Maxi - Mini) * Ns);
@@ -416,8 +403,7 @@ begin
       RectEcr.bottom := yecr + Htxt / 2;
       grad := Mini + i * GraduationMajeure;
       st := Format(FFormatValeurs, [grad]);
-      Canvas.FillText(RectEcr, st, false, 1, [], TTextAlign.Center,
-        TTextAlign.Center);
+      Canvas.FillText(RectEcr, st, false, 1, [], TTextAlign.Center, TTextAlign.Center);
       if MontreGraduationMajeure then
       begin
         x1 := Rx * cos(angleMaj) + Xc;
@@ -425,8 +411,7 @@ begin
         x2 := (Rx - LongueurGraduationMajeure) * cos(angleMaj) + Xc;
         y2 := (Ry - LongueurGraduationMajeure) * -sin(angleMaj) + Yc;
         Canvas.DrawLine(TPointF.Create(x1, y1), TPointF.Create(x2, y2), 1);
-        if (MontreGraduationMineure) and (GraduationMineure > 0) and
-          (i <> nbgradMaj - 1) then
+        if (MontreGraduationMineure) and (GraduationMineure > 0) and (i <> nbgradMaj - 1) then
         begin
           for j := 1 to nbgradMin - 1 do
           begin
@@ -515,42 +500,43 @@ begin
   FCadran := Custom;
 end;
 
-function TJaugeCir.dessineBordure(lrg, htr: integer; gnr: TGenre;
-  Xc, Yc, Rx, Ry: Single): TBitmap;
+function TJaugeCir.dessineBordure(mat: TMatiere; lrg, htr: integer; gnr: TGenre; Xc, Yc, Rx, Ry: Single): TBitmap;
 
 var
   bmp: TBitmap;
-  //ptA, ptB, v: TPointF;
-  ptO:TPointF;
+  // ptA, ptB, v: TPointF;
+  ptO: TPointF;
   x, y, n: integer;
   L, d, dc, rr, gg, bb: Single;
   dpt, dx2, dy2, rx2, ry2, rbx2, rby2: Single;
   coul: TAlphaColor;
   dta: TBitmapData;
   dedans: boolean;
-  dx,dy:Single;
-const
+  dx, dy: Single;
+  {
+    const
 
-  vr: array [0 .. 8] of byte = (136, 124, 231, 216, 203, 142, 149, 243, 131);
-  vg: array [0 .. 8] of byte = (108, 99, 194, 179, 165, 112, 120, 209, 102);
-  vb: array [0 .. 8] of byte = (45, 35, 124, 111, 103, 40, 50, 137, 32);
-  fracs: array [0 .. 8] of Single = (0, 0.139116203, 0.291325696, 0.340425532,
+    vr: array [0 .. 8] of byte = (136, 124, 231, 216, 203, 142, 149, 243, 131);
+    vg: array [0 .. 8] of byte = (108, 99, 194, 179, 165, 112, 120, 209, 102);
+    vb: array [0 .. 8] of byte = (45, 35, 124, 111, 103, 40, 50, 137, 32);
+    fracs: array [0 .. 8] of Single = (0, 0.139116203, 0.291325696, 0.340425532,
     0.425531915, 0.602291326, 0.669394435, 0.818330606, 1);
+  }
 begin
   bmp := TBitmap.Create(lrg, htr);
-  //ptA := TPointF.Create(Xc - 0.707 * (Rx + FEpaisseurBordure / 2),
-    //Yc - 0.707 * (Ry + FEpaisseurBordure / 2));
-  //ptB := TPointF.Create(Xc + 0.707 * (Rx + FEpaisseurBordure / 2),
-    //Yc + 0.707 * (Ry + FEpaisseurBordure / 2));
-  //v := TPointF.Create(ptB.y - ptA.y, ptA.x - ptB.x);
-  //d := v.x * v.x + v.y * v.y;
+  // ptA := TPointF.Create(Xc - 0.707 * (Rx + FEpaisseurBordure / 2),
+  // Yc - 0.707 * (Ry + FEpaisseurBordure / 2));
+  // ptB := TPointF.Create(Xc + 0.707 * (Rx + FEpaisseurBordure / 2),
+  // Yc + 0.707 * (Ry + FEpaisseurBordure / 2));
+  // v := TPointF.Create(ptB.y - ptA.y, ptA.x - ptB.x);
+  // d := v.x * v.x + v.y * v.y;
   rx2 := Rx * Rx;
   ry2 := Ry * Ry;
   rbx2 := (Rx + FEpaisseurBordure) * (Rx + FEpaisseurBordure);
   rby2 := (Ry + FEpaisseurBordure) * (Ry + FEpaisseurBordure);
 
-  ptO := TPointF.Create(Xc - 2*Rx/3,Yc - 2*Ry/3);
-  //ptO := TPointF.Create(Xc,Yc);
+  ptO := TPointF.Create(Xc - 2 * Rx / 3, Yc - 2 * Ry / 3);
+  // ptO := TPointF.Create(Xc,Yc);
   if bmp.Map(TMapAccess.Write, dta) then
   begin
     for x := 0 to bmp.Width - 1 do
@@ -589,7 +575,7 @@ begin
             end;
           QuartDeCercleHautDroit:
             begin
-            if (x < Xc) or (y>yc)then
+              if (x < Xc) or (y > Yc) then
               begin
                 dpt := dx2 / rbx2 + dy2 / rby2;
                 dedans := (dpt <= 1);
@@ -606,7 +592,7 @@ begin
             end;
           QuartDeCercleHautGauche:
             begin
-            if (x > Xc) or (y>yc)then
+              if (x > Xc) or (y > Yc) then
               begin
                 dpt := dx2 / rbx2 + dy2 / rby2;
                 dedans := (dpt <= 1);
@@ -623,7 +609,7 @@ begin
             end;
           QuartDeCercleBasDroit:
             begin
-              if (x < Xc) or (y<yc)then
+              if (x < Xc) or (y < Yc) then
               begin
                 dpt := dx2 / rbx2 + dy2 / rby2;
                 dedans := (dpt <= 1);
@@ -640,7 +626,7 @@ begin
             end;
           QuartDeCercleBasGauche:
             begin
-            if (x > Xc) or (y<yc)then
+              if (x > Xc) or (y < Yc) then
               begin
                 dpt := dx2 / rbx2 + dy2 / rby2;
                 dedans := (dpt <= 1);
@@ -658,50 +644,27 @@ begin
         end;
         if dedans then
         begin
-          //L := ((ptA.x - x) * v.y + (y - ptA.y) * v.x) / d;
-        dx := X - ptO.X;
-        dy := Y - ptO.Y;
-        if dx = 0 then
-        begin
-          if dy < 0 then
-            L := 3 * PI / 4
-          else
-            L := PI / 4;
-        end
-        else
-        begin
-          L := arctan(dy / dx);
-          if dx < 0 then
-            L := L + PI;
-          if (dx > 0) and (dy < 0) then
-            L := L + 2 * PI;
-        end;
-        L := L / 2 / PI;
-
-          if L < 0 then
+          // L := ((ptA.x - x) * v.y + (y - ptA.y) * v.x) / d;
+          dx := x - ptO.x;
+          dy := y - ptO.y;
+          if dx = 0 then
           begin
-            coul := $FF000000 + vr[0] shl 16 + vg[0] shl 8 + vb[0];
+            if dy < 0 then
+              L := 3 * Pi / 4
+            else
+              L := Pi / 4;
           end
           else
           begin
-            if L > 1 then
-            begin
-              coul := $FF000000 + vr[4] shl 16 + vg[4] shl 8 + vb[4];
-            end
-            else
-            begin
-              n := 0;
-              while (L > fracs[n]) and (n < 9) do
-                inc(n);
-              dc := (L - fracs[n - 1]) / (fracs[n] - fracs[n - 1]);
-              dc:=sin(pi/2*dc);
-              rr := (vr[n] - vr[n - 1]) * dc + vr[n - 1];
-              gg := (vg[n] - vg[n - 1]) * dc + vg[n - 1];
-              bb := (vb[n] - vb[n - 1]) * dc + vb[n - 1];
-              coul := $FF000000 + round(rr) shl 16 + round(gg) shl 8 +
-                round(bb);
-            end;
+            L := arctan(dy / dx);
+            if dx < 0 then
+              L := L + Pi;
+            if (dx > 0) and (dy < 0) then
+              L := L + 2 * Pi;
           end;
+          L := L / 2 / Pi;
+          coul := getCoulMatiere(FAspectBordure, L)
+
         end
         else
           coul := 0;

@@ -4,7 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Types, FMX.Types, FMX.Controls,
-  FMX.Objects, FMX.Graphics, System.UITypes,
+  FMX.Objects, FMX.Graphics, System.UITypes, Couleurs,
   System.UIConsts, System.Math.Vectors;
 
 type
@@ -21,6 +21,7 @@ type
     FGenre: TGenre;
     FCadran: TCadran;
     FGenreSeuil: TGenreSeuil;
+    FAspectBordure: TMatiere;
     procedure SetFormatValeurs(Value: String);
     procedure SetGenreSeuil(Value: TGenreSeuil);
     procedure SetEpaisseurBordure(Value: integer);
@@ -40,7 +41,7 @@ type
     procedure SetMontreValeurs(Value: boolean);
     procedure SetMontreSeuils(Value: boolean);
     procedure SetGradMobile(Value: boolean);
-    function dessineBordure: TBitmap;
+    function dessineBordure(Mat: TMatiere): TBitmap;
     procedure SetFGradMobile(const Value: boolean);
   protected
     { Déclarations protégées }
@@ -52,6 +53,7 @@ type
     property FormatValeurs: String read FFormatValeurs write SetFormatValeurs;
     property Genre: TGenre read FGenre write FGenre;
     property Cadran: TCadran read FCadran write FCadran;
+    property AspectBordure: TMatiere read FAspectBordure write FAspectBordure;
     property GenreSeuil: TGenreSeuil read FGenreSeuil write SetGenreSeuil;
     property EpaisseurBordure: integer read FEpaisseurBordure write SetEpaisseurBordure;
     property EpaisseurSeuil: integer read FEpaisseurSeuil write SetEpaisseurSeuil;
@@ -125,9 +127,9 @@ begin
 
   // Dessin de la bordure
 
-  if FEpaisseurBordure > 0 then
+  if (FEpaisseurBordure > 0) and (FAspectBordure <> MAT_SANS) then
   begin
-    Bordure := dessineBordure;
+    Bordure := dessineBordure(FAspectBordure);
     Canvas.DrawBitmap(Bordure, TRectF.Create(0, 0, Width, Height), TRectF.Create(0, 0, Width, Height), 1, true);
     Bordure.Free;
   end;
@@ -501,9 +503,10 @@ begin
   FGenreSeuil := SeuilVertJauneRouge;
   FCadran := Custom;
   FDynamique := 20;
+  FAspectBordure := MAT_BRASS;
 end;
 
-function TJaugeRect.dessineBordure: TBitmap;
+function TJaugeRect.dessineBordure(Mat: TMatiere): TBitmap;
 
 var
   bmp: TBitmap;
@@ -514,19 +517,13 @@ var
   dpt, dx2, dy2, rx2, ry2, rbx2, rby2: Single;
   coul: TAlphaColor;
   dta: TBitmapData;
-  dedans: boolean;
   dx, dy: Single;
-const
 
-  vr: array [0 .. 8] of byte = (136, 124, 231, 216, 203, 142, 149, 243, 131);
-  vg: array [0 .. 8] of byte = (108, 99, 194, 179, 165, 112, 120, 209, 102);
-  vb: array [0 .. 8] of byte = (45, 35, 124, 111, 103, 40, 50, 137, 32);
-  fracs: array [0 .. 8] of Single = (0, 0.139116203, 0.291325696, 0.340425532, 0.425531915, 0.602291326, 0.669394435,
-    0.818330606, 1);
 begin
+
   bmp := TBitmap.Create(round(Width), round(Height));
 
-  ptO := TPointF.Create(Width/3,Height/3);
+  ptO := TPointF.Create(Width / 3, Height / 3);
   // ptO := TPointF.Create(Xc,Yc);
   if bmp.Map(TMapAccess.Write, dta) then
   begin
@@ -534,7 +531,6 @@ begin
     begin
       for y := 0 to bmp.Height - 1 do
       begin
-
 
         dx := x - ptO.x;
         dy := y - ptO.y;
@@ -554,36 +550,15 @@ begin
             L := L + 2 * PI;
         end;
         L := L / 2 / PI;
+        coul:=getCoulMatiere(Mat,L);
 
-        if L < 0 then
-        begin
-          coul := $FF000000 + vr[0] shl 16 + vg[0] shl 8 + vb[0];
-        end
-        else
-        begin
-          if L > 1 then
-          begin
-            coul := $FF000000 + vr[8] shl 16 + vg[8] shl 8 + vb[8];
-          end
-          else
-          begin
-            n := 0;
-            while (L > fracs[n]) and (n < 9) do
-              inc(n);
-            dc := (L - fracs[n - 1]) / (fracs[n] - fracs[n - 1]);
-            dc := sin(PI / 2 * dc);
-            rr := (vr[n] - vr[n - 1]) * dc + vr[n - 1];
-            gg := (vg[n] - vg[n - 1]) * dc + vg[n - 1];
-            bb := (vb[n] - vb[n - 1]) * dc + vb[n - 1];
-            coul := $FF000000 + round(rr) shl 16 + round(gg) shl 8 + round(bb);
-          end;
-        end;
 
         dta.SetPixel(x, y, coul);
       end;
     end;
     bmp.Unmap(dta);
   end;
+
   result := bmp;
 end;
 
