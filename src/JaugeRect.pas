@@ -40,7 +40,7 @@ type
     procedure SetMontreValeurs(Value: boolean);
     procedure SetMontreSeuils(Value: boolean);
     procedure SetGradMobile(Value: boolean);
-    function dessineBordure(lrg, htr: integer; gnr: TGenre; Xc, Yc, Rx, Ry: Single): TBitmap;
+    function dessineBordure: TBitmap;
     procedure SetFGradMobile(const Value: boolean);
   protected
     { Déclarations protégées }
@@ -124,18 +124,18 @@ begin
   br.Free;
 
   // Dessin de la bordure
-  {
-    if FEpaisseurBordure > 0 then
-    begin
-    Bordure := dessineBordure(round(Width), round(Height), FGenre, Xc, Yc, Rx, Ry);
+
+  if FEpaisseurBordure > 0 then
+  begin
+    Bordure := dessineBordure;
     Canvas.DrawBitmap(Bordure, TRectF.Create(0, 0, Width, Height), TRectF.Create(0, 0, Width, Height), 1, true);
     Bordure.Free;
-    end;
-  }
+  end;
+
   // dessin de la bordure
-  Canvas.Fill.Color := claBlack;
-  Canvas.FillRect(rect, 1);
-  //Dession du fond
+  // Canvas.Fill.Color := claBlack;
+  // Canvas.FillRect(rect, 1);
+  // Dession du fond
 
   case FCadran of
     Blanc:
@@ -275,8 +275,8 @@ begin
         end;
         br := TBrush.Create(TBrushKind.Solid, claYellow);
         if xs1 > xs0 then
-        Canvas.FillRect(TRectF.Create(xs0, FEpaisseurBordure, xs1, FEpaisseurBordure + FEpaisseurSeuil), 0, 0,
-          AllCorners, 100, br);
+          Canvas.FillRect(TRectF.Create(xs0, FEpaisseurBordure, xs1, FEpaisseurBordure + FEpaisseurSeuil), 0, 0,
+            AllCorners, 100, br);
 
         br.Free;
         // Coloration de SeuilB à maxi
@@ -284,7 +284,7 @@ begin
         if FGradMobile then
         begin
 
-          xs1 := aa * (FValeur + letendue / 2)  + bb;
+          xs1 := aa * (FValeur + letendue / 2) + bb;
           if xs1 < FEpaisseurBordure then
             xs1 := FEpaisseurBordure;
           if xs1 > Width - FEpaisseurBordure then
@@ -296,8 +296,8 @@ begin
         end;
         br := TBrush.Create(TBrushKind.Solid, claRed);
         if xs1 > xs0 then
-        Canvas.FillRect(TRectF.Create(xs0, FEpaisseurBordure, xs1, FEpaisseurBordure + FEpaisseurSeuil), 0, 0,
-          AllCorners, 100, br);
+          Canvas.FillRect(TRectF.Create(xs0, FEpaisseurBordure, xs1, FEpaisseurBordure + FEpaisseurSeuil), 0, 0,
+            AllCorners, 100, br);
         br.Free;
 
       end;
@@ -503,7 +503,7 @@ begin
   FDynamique := 20;
 end;
 
-function TJaugeRect.dessineBordure(lrg, htr: integer; gnr: TGenre; Xc, Yc, Rx, Ry: Single): TBitmap;
+function TJaugeRect.dessineBordure: TBitmap;
 
 var
   bmp: TBitmap;
@@ -524,19 +524,9 @@ const
   fracs: array [0 .. 8] of Single = (0, 0.139116203, 0.291325696, 0.340425532, 0.425531915, 0.602291326, 0.669394435,
     0.818330606, 1);
 begin
-  bmp := TBitmap.Create(lrg, htr);
-  // ptA := TPointF.Create(Xc - 0.707 * (Rx + FEpaisseurBordure / 2),
-  // Yc - 0.707 * (Ry + FEpaisseurBordure / 2));
-  // ptB := TPointF.Create(Xc + 0.707 * (Rx + FEpaisseurBordure / 2),
-  // Yc + 0.707 * (Ry + FEpaisseurBordure / 2));
-  // v := TPointF.Create(ptB.y - ptA.y, ptA.x - ptB.x);
-  // d := v.x * v.x + v.y * v.y;
-  rx2 := Rx * Rx;
-  ry2 := Ry * Ry;
-  rbx2 := (Rx + FEpaisseurBordure) * (Rx + FEpaisseurBordure);
-  rby2 := (Ry + FEpaisseurBordure) * (Ry + FEpaisseurBordure);
+  bmp := TBitmap.Create(round(Width), round(Height));
 
-  ptO := TPointF.Create(Xc - 2 * Rx / 3, Yc - 2 * Ry / 3);
+  ptO := TPointF.Create(Width/3,Height/3);
   // ptO := TPointF.Create(Xc,Yc);
   if bmp.Map(TMapAccess.Write, dta) then
   begin
@@ -544,58 +534,51 @@ begin
     begin
       for y := 0 to bmp.Height - 1 do
       begin
-        dedans := false;
-        dx2 := (x - Xc) * (x - Xc);
-        dy2 := (y - Yc) * (y - Yc);
 
-        if dedans then
+
+        dx := x - ptO.x;
+        dy := y - ptO.y;
+        if dx = 0 then
         begin
-          // L := ((ptA.x - x) * v.y + (y - ptA.y) * v.x) / d;
-          dx := x - ptO.x;
-          dy := y - ptO.y;
-          if dx = 0 then
-          begin
-            if dy < 0 then
-              L := 3 * PI / 4
-            else
-              L := PI / 4;
-          end
+          if dy < 0 then
+            L := 3 * PI / 4
           else
-          begin
-            L := arctan(dy / dx);
-            if dx < 0 then
-              L := L + PI;
-            if (dx > 0) and (dy < 0) then
-              L := L + 2 * PI;
-          end;
-          L := L / 2 / PI;
-
-          if L < 0 then
-          begin
-            coul := $FF000000 + vr[0] shl 16 + vg[0] shl 8 + vb[0];
-          end
-          else
-          begin
-            if L > 1 then
-            begin
-              coul := $FF000000 + vr[4] shl 16 + vg[4] shl 8 + vb[4];
-            end
-            else
-            begin
-              n := 0;
-              while (L > fracs[n]) and (n < 9) do
-                inc(n);
-              dc := (L - fracs[n - 1]) / (fracs[n] - fracs[n - 1]);
-              dc := sin(PI / 2 * dc);
-              rr := (vr[n] - vr[n - 1]) * dc + vr[n - 1];
-              gg := (vg[n] - vg[n - 1]) * dc + vg[n - 1];
-              bb := (vb[n] - vb[n - 1]) * dc + vb[n - 1];
-              coul := $FF000000 + round(rr) shl 16 + round(gg) shl 8 + round(bb);
-            end;
-          end;
+            L := PI / 4;
         end
         else
-          coul := 0;
+        begin
+          L := arctan(dy / dx);
+          if dx < 0 then
+            L := L + PI;
+          if (dx > 0) and (dy < 0) then
+            L := L + 2 * PI;
+        end;
+        L := L / 2 / PI;
+
+        if L < 0 then
+        begin
+          coul := $FF000000 + vr[0] shl 16 + vg[0] shl 8 + vb[0];
+        end
+        else
+        begin
+          if L > 1 then
+          begin
+            coul := $FF000000 + vr[8] shl 16 + vg[8] shl 8 + vb[8];
+          end
+          else
+          begin
+            n := 0;
+            while (L > fracs[n]) and (n < 9) do
+              inc(n);
+            dc := (L - fracs[n - 1]) / (fracs[n] - fracs[n - 1]);
+            dc := sin(PI / 2 * dc);
+            rr := (vr[n] - vr[n - 1]) * dc + vr[n - 1];
+            gg := (vg[n] - vg[n - 1]) * dc + vg[n - 1];
+            bb := (vb[n] - vb[n - 1]) * dc + vb[n - 1];
+            coul := $FF000000 + round(rr) shl 16 + round(gg) shl 8 + round(bb);
+          end;
+        end;
+
         dta.SetPixel(x, y, coul);
       end;
     end;
