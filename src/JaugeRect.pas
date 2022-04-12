@@ -116,6 +116,7 @@ var
   fin: boolean;
   curseur: TPolygon;
   wcurs: Single;
+  DimSeuil: Single;
 begin
 
   Canvas.BeginScene;
@@ -176,6 +177,7 @@ begin
   // calculs des constantes en fonction de la configuration de la jauge
   if FGenre = Horizontale then
   begin
+    DimSeuil := Width;
     if FGradMobile then
     begin
       letendue := FDynamique;
@@ -216,11 +218,43 @@ begin
   end
   else
   begin
+    DimSeuil := Height;
     if FGradMobile then
     begin
+      letendue := FDynamique;
+      if GraduationMajeure > 0 then
+      begin
+        nbgradMaj := round(letendue / GraduationMajeure) + 1;
+        dpixMaj := (Height - 2 * FEpaisseurBordure) / (nbgradMaj - 1);
+        if (GraduationMineure > 0) and (GraduationMajeure > GraduationMineure) then
+        begin
+          nbgradMin := round(GraduationMajeure / GraduationMineure);
+          dpixMin := dpixMaj / nbgradMin;
+        end;
+      end;
+      aa := (Height - 2 * FEpaisseurBordure) / letendue;
+      bb := Height / 2 - aa * Valeur;
     end
     else
     begin
+      letendue := FMaxi - FMini;
+      st := Format(FFormatValeurs, [FMini]);
+      Wtxt := Canvas.TextWidth(st);
+      st := Format(FFormatValeurs, [FMaxi]);
+      if Wtxt < Canvas.TextWidth(st) then
+        Wtxt := Canvas.TextWidth(st);
+      if GraduationMajeure > 0 then
+      begin
+        nbgradMaj := round(letendue / GraduationMajeure) + 1;
+        dpixMaj := (Height - 2 * FEpaisseurBordure - Wtxt) / (nbgradMaj - 1);
+        if (GraduationMineure > 0) and (GraduationMajeure > GraduationMineure) then
+        begin
+          nbgradMin := round(GraduationMajeure / GraduationMineure);
+          dpixMin := dpixMaj / nbgradMin;
+        end;
+      end;
+      aa := (Height - 2 * FEpaisseurBordure - Wtxt) / letendue;
+      bb := Height / 2 - aa * (FMaxi + FMini) / 2;
     end;
   end;
 
@@ -233,87 +267,109 @@ begin
       br := TBrush.Create(TBrushKind.Solid, claGreen);
       if GenreSeuil = SeuilRougeVertRouge then
         br.Color := claRed;
+
+      // Coloration de mini à seuil A
+      if FGradMobile then
+      begin
+        xs0 := aa * (FValeur - letendue / 2) + bb;
+        if xs0 < FEpaisseurBordure then
+          xs0 := FEpaisseurBordure;
+        if xs0 > DimSeuil - FEpaisseurBordure then
+          xs0 := DimSeuil - FEpaisseurBordure;
+        xs1 := aa * Seuil_A + bb;
+        if xs1 < FEpaisseurBordure then
+          xs1 := FEpaisseurBordure;
+        if xs1 > DimSeuil - FEpaisseurBordure then
+          xs1 := DimSeuil - FEpaisseurBordure;
+      end
+      else
+      begin
+        xs0 := aa * FMini + bb;
+        xs1 := aa * Seuil_A + bb;
+      end;
       if FGenre = Horizontale then
       begin
-        // Coloration de mini à seuil A
-        if FGradMobile then
-        begin
-          xs0 := aa * (FValeur - letendue / 2) + bb;
-          if xs0 < FEpaisseurBordure then
-            xs0 := FEpaisseurBordure;
-          if xs0 > Width - FEpaisseurBordure then
-            xs0 := Width - FEpaisseurBordure;
-          xs1 := aa * Seuil_A + bb;
-          if xs1 < FEpaisseurBordure then
-            xs1 := FEpaisseurBordure;
-          if xs1 > Width - FEpaisseurBordure then
-            xs1 := Width - FEpaisseurBordure;
-        end
-        else
-        begin
-          xs0 := aa * FMini + bb;
-          xs1 := aa * Seuil_A + bb;
-        end;
         if xs1 > xs0 then
           Canvas.FillRect(TRectF.Create(xs0, FEpaisseurBordure, xs1, FEpaisseurBordure + FEpaisseurSeuil), 0, 0,
             AllCorners, 100, br);
-        br.Free;
-        xs0 := xs1;
-        // Coloration de SeuilA à seuil B
-        if GenreSeuil = SeuilRougeVertRouge then
-          br.Color := claGreen;
-        if FGradMobile then
-        begin
-
-          xs1 := aa * Seuil_B + bb;
-          if xs1 < FEpaisseurBordure then
-            xs1 := FEpaisseurBordure;
-          if xs1 > Width - FEpaisseurBordure then
-            xs1 := Width - FEpaisseurBordure;
-        end
-        else
-        begin
-          xs1 := aa * Seuil_B + bb;
-        end;
-        br := TBrush.Create(TBrushKind.Solid, claYellow);
+      end
+      else
+      begin
         if xs1 > xs0 then
-          Canvas.FillRect(TRectF.Create(xs0, FEpaisseurBordure, xs1, FEpaisseurBordure + FEpaisseurSeuil), 0, 0,
+          Canvas.FillRect(TRectF.Create(FEpaisseurBordure, xs0, FEpaisseurBordure + FEpaisseurSeuil, xs1), 0, 0,
             AllCorners, 100, br);
-
-        br.Free;
-        // Coloration de SeuilB à maxi
-        xs0 := xs1;
-        if FGradMobile then
-        begin
-
-          xs1 := aa * (FValeur + letendue / 2) + bb;
-          if xs1 < FEpaisseurBordure then
-            xs1 := FEpaisseurBordure;
-          if xs1 > Width - FEpaisseurBordure then
-            xs1 := Width - FEpaisseurBordure;
-        end
-        else
-        begin
-          xs1 := aa * FMaxi + bb;
-        end;
-        br := TBrush.Create(TBrushKind.Solid, claRed);
-        if xs1 > xs0 then
-          Canvas.FillRect(TRectF.Create(xs0, FEpaisseurBordure, xs1, FEpaisseurBordure + FEpaisseurSeuil), 0, 0,
-            AllCorners, 100, br);
-        br.Free;
-
       end;
+      br.Free;
+      xs0 := xs1;
+      // Coloration de SeuilA à seuil B
+      br := TBrush.Create(TBrushKind.Solid, claYellow);
+      if GenreSeuil = SeuilRougeVertRouge then
+        br.Color := claGreen;
+      if FGradMobile then
+      begin
+        xs1 := aa * Seuil_B + bb;
+        if xs1 < FEpaisseurBordure then
+          xs1 := FEpaisseurBordure;
+        if xs1 > DimSeuil - FEpaisseurBordure then
+          xs1 := DimSeuil - FEpaisseurBordure;
+      end
+      else
+      begin
+        xs1 := aa * Seuil_B + bb;
+      end;
+
+      if FGenre = Horizontale then
+      begin
+        if xs1 > xs0 then
+          Canvas.FillRect(TRectF.Create(xs0, FEpaisseurBordure, xs1, FEpaisseurBordure + FEpaisseurSeuil), 0, 0,
+            AllCorners, 100, br);
+      end
+      else
+      begin
+        Canvas.FillRect(TRectF.Create(FEpaisseurBordure, xs0, FEpaisseurBordure + FEpaisseurSeuil, xs1), 0, 0,
+          AllCorners, 100, br);
+      end;
+
+      br.Free;
+      // Coloration de SeuilB à maxi
+      xs0 := xs1;
+      if FGradMobile then
+      begin
+
+        xs1 := aa * (FValeur + letendue / 2) + bb;
+        if xs1 < FEpaisseurBordure then
+          xs1 := FEpaisseurBordure;
+        if xs1 > DimSeuil - FEpaisseurBordure then
+          xs1 := DimSeuil - FEpaisseurBordure;
+      end
+      else
+      begin
+        xs1 := aa * FMaxi + bb;
+      end;
+      br := TBrush.Create(TBrushKind.Solid, claRed);
+      if FGenre = Horizontale then
+      begin
+        if xs1 > xs0 then
+          Canvas.FillRect(TRectF.Create(xs0, FEpaisseurBordure, xs1, FEpaisseurBordure + FEpaisseurSeuil), 0, 0,
+            AllCorners, 100, br);
+      end
+      else
+      begin
+        Canvas.FillRect(TRectF.Create(FEpaisseurBordure, xs0, FEpaisseurBordure + FEpaisseurSeuil, xs1), 0, 0,
+          AllCorners, 100, br);
+      end;
+      br.Free;
+
     end;
   end;
 
   if MontreValeurs and (letendue > 0) then
   begin
     Canvas.Fill.Color := Stroke.Color;
+    Xc := Width / 2;
+    Yc := Height / 2;
     if FGenre = Horizontale then
     begin
-      Xc := Width / 2;
-      Yc := Height / 2;
-
       if FGradMobile then
       begin
         grad0 := trunc(FValeur / FGraduationMajeure);
@@ -379,16 +435,10 @@ begin
         Canvas.Stroke.Color := claRed;
         Canvas.DrawLine(TPointF.Create(Xc, FEpaisseurBordure), TPointF.Create(Xc, Height - FEpaisseurBordure), 1);
         setLength(curseur, 4);
-        if MontreGraduationMajeure then
-        begin
-          curseur[0] := TPointF.Create(Xc, yecr + 4 + Htxt);
-          wcurs := Htxt / sqrt(3);
-        end
-        else
-        begin
-          curseur[0] := TPointF.Create(Xc, Yc);
-          wcurs := (Yc - FEpaisseurBordure) / sqrt(3);
-        end;
+
+        curseur[0] := TPointF.Create(Xc, yecr + 4 + Htxt);
+        wcurs := Htxt / sqrt(3);
+
         curseur[1] := TPointF.Create(Xc - wcurs, Height - FEpaisseurBordure);
         curseur[2] := TPointF.Create(Xc + wcurs, Height - FEpaisseurBordure);
         curseur[3] := curseur[0];
@@ -457,19 +507,164 @@ begin
         x1 := aa * Valeur + bb;
         Canvas.DrawLine(TPointF.Create(x1, FEpaisseurBordure), TPointF.Create(x1, Height - FEpaisseurBordure), 1);
         setLength(curseur, 4);
-        if MontreGraduationMajeure then
-        begin
-          curseur[0] := TPointF.Create(x1, yecr + 4 + Htxt);
-          wcurs := Htxt / sqrt(3);
-        end
-        else
-        begin
-          curseur[0] := TPointF.Create(x1, Yc);
-          wcurs := (Yc - FEpaisseurBordure) / sqrt(3);
-        end;
+
+        curseur[0] := TPointF.Create(x1, yecr + 4 + Htxt);
+        wcurs := Htxt / sqrt(3);
+
         curseur[1] := TPointF.Create(x1 - wcurs, Height - FEpaisseurBordure);
         curseur[2] := TPointF.Create(x1 + wcurs, Height - FEpaisseurBordure);
         curseur[3] := curseur[0];
+        Canvas.FillPolygon(curseur, 1);
+      end;
+    end
+    else
+    begin
+      /// Graduation en mode vertical
+      if FGradMobile then
+      begin
+        grad0 := trunc(FValeur / FGraduationMajeure);
+        sens := -1;
+        repeat
+          i := 0;
+          fin := false;
+          while not(fin) do
+          begin
+            grad := (grad0 + i * sens) * GraduationMajeure;
+            st := Format(FFormatValeurs, [grad]);
+            Htxt := Canvas.TextHeight(st);
+            Wtxt := Canvas.TextWidth(st);
+            yecr := aa * (grad0 + i * sens) * FGraduationMajeure + bb;
+            xecr := EpaisseurBordure + LongueurGraduationMajeure + 4;
+            if sens < 0 then
+              fin := yecr - Htxt / 2 < EpaisseurBordure
+            else
+              fin := yecr + Htxt / 2 > Height - EpaisseurBordure;
+            if not(fin) then
+            begin
+              RectEcr.Left := xecr + 4;
+              RectEcr.Top := yecr - Htxt / 2;
+              RectEcr.Right := xecr + 4 + Wtxt;
+              RectEcr.Bottom := yecr + Htxt / 2;
+              Canvas.FillText(RectEcr, st, false, 1, [], TTextAlign.Center, TTextAlign.Center);
+              if MontreGraduationMajeure then
+              begin
+                x1 := EpaisseurBordure + 4;
+                y1 := yecr;
+                x2 := x1 + LongueurGraduationMajeure;
+                y2 := yecr;
+                Canvas.DrawLine(TPointF.Create(x1, y1), TPointF.Create(x2, y2), 1);
+                if (MontreGraduationMineure) and (GraduationMineure > 0) then
+                begin
+                  j := 1;
+                  while not(fin) and (j < nbgradMin) do
+                  begin
+                    y1 := yecr + j * sens * dpixMin;
+                    if sens < 0 then
+                      fin := y1 < FEpaisseurBordure
+                    else
+                      fin := y1 > Height - FEpaisseurBordure;
+                    if not(fin) then
+                    begin
+                      x1 := EpaisseurBordure + 4;
+                      y2 := y1;
+                      x2 := x1 + LongueurGraduationMineure;
+                      Canvas.DrawLine(TPointF.Create(x1, y1), TPointF.Create(x2, y2), 1);
+                    end;
+                    inc(j);
+                  end;
+                end;
+              end;
+            end;
+            inc(i);
+          end;
+          sens := sens + 2;
+        until sens > 1;
+        // dessin du curseur
+        // ligne verticale avec en dessous un triangle equilatéral
+        Canvas.Fill.Color := claRed;
+        Canvas.Stroke.Color := claRed;
+        Canvas.DrawLine(TPointF.Create(FEpaisseurBordure, Yc), TPointF.Create(Width - FEpaisseurBordure, Yc), 1);
+        setLength(curseur, 4);
+
+        curseur[0] := TPointF.Create(xecr + 4 + Wtxt, Yc);
+        wcurs := Htxt / sqrt(3);
+
+        curseur[1] := TPointF.Create(Width - FEpaisseurBordure, Yc - wcurs);
+        curseur[2] := TPointF.Create(Width - FEpaisseurBordure, Yc + wcurs);
+        curseur[3] := curseur[0];
+        Canvas.FillPolygon(curseur, 1);
+      end
+      else
+      begin
+
+        grad := FMini;
+
+        while grad < FMaxi do
+        begin
+          st := Format(FFormatValeurs, [grad]);
+          Htxt := Canvas.TextHeight(st);
+          Wtxt := Canvas.TextWidth(st);
+          yecr := aa * grad + bb;
+          xecr := EpaisseurBordure + LongueurGraduationMajeure + 4;
+          grad := grad + FGraduationMajeure;
+          RectEcr.Left := xecr;
+          RectEcr.Top := yecr - Htxt / 2;
+          RectEcr.Right := xecr + Wtxt;
+          RectEcr.Bottom := yecr + Htxt / 2;
+          Canvas.FillText(RectEcr, st, false, 1, [], TTextAlign.Center, TTextAlign.Center);
+          if MontreGraduationMajeure then
+          begin
+            y1 := yecr;
+            x1 := EpaisseurBordure + 4;
+            y2 := yecr;
+            x2 := x1 + LongueurGraduationMajeure;
+            Canvas.DrawLine(TPointF.Create(x1, y1), TPointF.Create(x2, y2), 1);
+            if (MontreGraduationMineure) and (GraduationMineure > 0) then
+            begin
+              for j := 1 to nbgradMin - 1 do
+              begin
+                y1 := yecr + j * dpixMin;
+                x1 := EpaisseurBordure + 4;
+                y2 := y1;
+                x2 := x1 + LongueurGraduationMineure;
+                Canvas.DrawLine(TPointF.Create(x1, y1), TPointF.Create(x2, y2), 1);
+              end;
+            end;
+          end;
+        end;
+        st := Format(FFormatValeurs, [FMaxi]);
+        Htxt := Canvas.TextHeight(st);
+        Wtxt := Canvas.TextWidth(st);
+        yecr := aa * grad + bb;
+        xecr := EpaisseurBordure + LongueurGraduationMajeure + 4;
+        grad := grad + FGraduationMajeure;
+        RectEcr.Left := xecr;
+        RectEcr.Top := yecr - Htxt / 2;
+        RectEcr.Right := xecr + Wtxt + 4;
+        RectEcr.Bottom := yecr + Htxt / 2;
+        Canvas.FillText(RectEcr, st, false, 1, [], TTextAlign.Center, TTextAlign.Center);
+        if MontreGraduationMajeure then
+        begin
+          y1 := yecr;
+          x1 := EpaisseurBordure + 4;
+          y2 := yecr;
+          x2 := x1 + LongueurGraduationMajeure;
+          Canvas.DrawLine(TPointF.Create(x1, y1), TPointF.Create(x2, y2), 1);
+        end;
+        // curseur
+        Canvas.Fill.Color := claRed;
+        Canvas.Stroke.Color := claRed;
+        y1 := aa * Valeur + bb;
+        Canvas.DrawLine(TPointF.Create(FEpaisseurBordure, y1), TPointF.Create(Width - FEpaisseurBordure, y1), 1);
+        setLength(curseur, 4);
+
+        curseur[0] := TPointF.Create(xecr + 4 + Wtxt, y1);
+        wcurs := Htxt / sqrt(3);
+
+        curseur[1] := TPointF.Create(Width - FEpaisseurBordure, y1 - wcurs);
+        curseur[2] := TPointF.Create(Width - FEpaisseurBordure, y1 + wcurs);
+        curseur[3] := curseur[0];
+
         Canvas.FillPolygon(curseur, 1);
       end;
     end;
@@ -550,8 +745,7 @@ begin
             L := L + 2 * PI;
         end;
         L := L / 2 / PI;
-        coul:=getCoulMatiere(Mat,L);
-
+        coul := getCoulMatiere(Mat, L);
 
         dta.SetPixel(x, y, coul);
       end;
