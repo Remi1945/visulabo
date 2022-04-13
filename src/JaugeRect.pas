@@ -22,6 +22,8 @@ type
     FCadran: TCadran;
     FGenreSeuil: TGenreSeuil;
     FAspectBordure: TMatiere;
+    FXBordure: Single;
+    FYBordure: Single;
     procedure SetFormatValeurs(Value: String);
     procedure SetGenreSeuil(Value: TGenreSeuil);
     procedure SetEpaisseurBordure(Value: integer);
@@ -42,7 +44,9 @@ type
     procedure SetMontreSeuils(Value: boolean);
     procedure SetGradMobile(Value: boolean);
     function dessineBordure(Mat: TMatiere): TBitmap;
-    procedure SetFGradMobile(const Value: boolean);
+    procedure SetFGradMobile(Value: boolean);
+    procedure setXBordure(Value: Single);
+    procedure setYBordure(Value: Single);
   protected
     { Déclarations protégées }
   public
@@ -72,7 +76,8 @@ type
     property MontreValeurs: boolean read FMontreValeurs write SetMontreValeurs;
     property MontreSeuils: boolean read FMontreSeuils write SetMontreSeuils;
     property GraduationMobile: boolean read FGradMobile write SetGradMobile;
-
+    property BordureX: Single read FXBordure write setXBordure;
+    property BordureY: Single read FYBordure write setYBordure;
   end;
 
 procedure Register;
@@ -384,18 +389,19 @@ begin
             Htxt := Canvas.TextHeight(st);
             Wtxt := Canvas.TextWidth(st);
             xecr := aa * (grad0 + i * sens) * FGraduationMajeure + bb;
-            yecr := EpaisseurBordure + LongueurGraduationMajeure + 4;
+            yecr := FEpaisseurBordure + LongueurGraduationMajeure + 4;
             if sens < 0 then
-              fin := xecr - Wtxt / 2 < EpaisseurBordure
+              fin := xecr - Wtxt / 2 < FEpaisseurBordure
             else
-              fin := xecr + Wtxt / 2 > Width - EpaisseurBordure;
+              fin := xecr + Wtxt / 2 > Width - FEpaisseurBordure;
             if not(fin) then
             begin
               RectEcr.Left := xecr - Wtxt / 2;
               RectEcr.Top := yecr;
               RectEcr.Right := xecr + Wtxt / 2;
               RectEcr.Bottom := yecr + Htxt;
-              Canvas.FillText(RectEcr, st, false, 1, [], TTextAlign.Center, TTextAlign.Center);
+              if (RectEcr.Left > FEpaisseurBordure) and (RectEcr.Right < Width - FEpaisseurBordure) then
+                Canvas.FillText(RectEcr, st, false, 1, [], TTextAlign.Center, TTextAlign.Center);
               if MontreGraduationMajeure then
               begin
                 x1 := xecr;
@@ -431,8 +437,8 @@ begin
         until sens > 1;
         // dessin du curseur
         // ligne verticale avec en dessous un triangle equilatéral
-        Canvas.Fill.Color := claRed;
-        Canvas.Stroke.Color := claRed;
+        Canvas.Fill.Color := claBlue;
+        Canvas.Stroke.Color := claBlue;
         Canvas.DrawLine(TPointF.Create(Xc, FEpaisseurBordure), TPointF.Create(Xc, Height - FEpaisseurBordure), 1);
         setLength(curseur, 4);
 
@@ -502,8 +508,8 @@ begin
           Canvas.DrawLine(TPointF.Create(x1, y1), TPointF.Create(x2, y2), 1);
         end;
         // curseur
-        Canvas.Fill.Color := claRed;
-        Canvas.Stroke.Color := claRed;
+        Canvas.Fill.Color := claBlue;
+        Canvas.Stroke.Color := claBlue;
         x1 := aa * Valeur + bb;
         Canvas.DrawLine(TPointF.Create(x1, FEpaisseurBordure), TPointF.Create(x1, Height - FEpaisseurBordure), 1);
         setLength(curseur, 4);
@@ -534,18 +540,19 @@ begin
             Htxt := Canvas.TextHeight(st);
             Wtxt := Canvas.TextWidth(st);
             yecr := aa * (grad0 + i * sens) * FGraduationMajeure + bb;
-            xecr := EpaisseurBordure + LongueurGraduationMajeure + 4;
+            xecr := FEpaisseurBordure + LongueurGraduationMajeure + 4;
             if sens < 0 then
-              fin := yecr - Htxt / 2 < EpaisseurBordure
+              fin := yecr - Htxt / 2 < FEpaisseurBordure
             else
-              fin := yecr + Htxt / 2 > Height - EpaisseurBordure;
+              fin := yecr + Htxt / 2 > Height - FEpaisseurBordure;
             if not(fin) then
             begin
               RectEcr.Left := xecr + 4;
               RectEcr.Top := yecr - Htxt / 2;
               RectEcr.Right := xecr + 4 + Wtxt;
               RectEcr.Bottom := yecr + Htxt / 2;
-              Canvas.FillText(RectEcr, st, false, 1, [], TTextAlign.Center, TTextAlign.Center);
+              if (RectEcr.Top > FEpaisseurBordure) and (RectEcr.Bottom < Height - FEpaisseurBordure) then
+                Canvas.FillText(RectEcr, st, false, 1, [], TTextAlign.Center, TTextAlign.Center);
               if MontreGraduationMajeure then
               begin
                 x1 := EpaisseurBordure + 4;
@@ -581,8 +588,8 @@ begin
         until sens > 1;
         // dessin du curseur
         // ligne verticale avec en dessous un triangle equilatéral
-        Canvas.Fill.Color := claRed;
-        Canvas.Stroke.Color := claRed;
+        Canvas.Fill.Color := claBlue;
+        Canvas.Stroke.Color := claBlue;
         Canvas.DrawLine(TPointF.Create(FEpaisseurBordure, Yc), TPointF.Create(Width - FEpaisseurBordure, Yc), 1);
         setLength(curseur, 4);
 
@@ -652,8 +659,8 @@ begin
           Canvas.DrawLine(TPointF.Create(x1, y1), TPointF.Create(x2, y2), 1);
         end;
         // curseur
-        Canvas.Fill.Color := claRed;
-        Canvas.Stroke.Color := claRed;
+        Canvas.Fill.Color := claBlue;
+        Canvas.Stroke.Color := claBlue;
         y1 := aa * Valeur + bb;
         Canvas.DrawLine(TPointF.Create(FEpaisseurBordure, y1), TPointF.Create(Width - FEpaisseurBordure, y1), 1);
         setLength(curseur, 4);
@@ -699,6 +706,8 @@ begin
   FCadran := Custom;
   FDynamique := 20;
   FAspectBordure := MAT_BRASS;
+  FXBordure := 0.33;
+  FYBordure := 0.33;
 end;
 
 function TJaugeRect.dessineBordure(Mat: TMatiere): TBitmap;
@@ -718,7 +727,7 @@ begin
 
   bmp := TBitmap.Create(round(Width), round(Height));
 
-  ptO := TPointF.Create(Width / 3, Height / 3);
+  ptO := TPointF.Create(FXBordure * Width, FYBordure * Height);
   // ptO := TPointF.Create(Xc,Yc);
   if bmp.Map(TMapAccess.Write, dta) then
   begin
@@ -766,7 +775,7 @@ begin
     result := 0;
 end;
 
-procedure TJaugeRect.SetFGradMobile(const Value: boolean);
+procedure TJaugeRect.SetFGradMobile(Value: boolean);
 begin
   FGradMobile := Value;
 end;
@@ -826,6 +835,30 @@ begin
     end;
     Repaint;
   end;
+end;
+
+procedure TJaugeRect.setXBordure(Value: Single);
+var
+  v: Single;
+begin
+  v := Value;
+  if v > 1 then
+    v := 1;
+  if v < 0 then
+    v := 0;
+  FXBordure := v;
+end;
+
+procedure TJaugeRect.setYBordure(Value: Single);
+var
+  v: Single;
+begin
+  v := Value;
+  if v > 1 then
+    v := 1;
+  if v < 0 then
+    v := 0;
+  FYBordure := v;
 end;
 
 procedure TJaugeRect.SetSeuil_A(Value: double);
