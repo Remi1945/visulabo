@@ -8,37 +8,6 @@ object Form1: TForm1
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
   DesignerMasterStyle = 0
-  object JaugeRect1: TJaugeRect
-    Position.X = 256.000000000000000000
-    Position.Y = 200.000000000000000000
-    Size.Width = 89.000000000000000000
-    Size.Height = 281.000000000000000000
-    Size.PlatformDefault = False
-    FormatValeurs = '%2.1f'
-    Genre = Vertcale
-    Cadran = Custom
-    AspectBordure = MAT_BRASS
-    GenreSeuil = SeuilRougeVertRouge
-    EpaisseurBordure = 12
-    EpaisseurSeuil = 20
-    LongueurGraduationMajeure = 16
-    LongueurGraduationMineure = 8
-    Maxi = 40.000000000000000000
-    Dynamique = 20.000000000000000000
-    Mini = -40.000000000000000000
-    Valeur = 29.200000000000000000
-    Seuil_A = 10.000000000000000000
-    Seuil_B = 12.000000000000000000
-    GraduationMajeure = 10.000000000000000000
-    GraduationMineure = 2.000000000000000000
-    MontreGraduationMineure = True
-    MontreGraduationMajeure = True
-    MontreValeurs = True
-    MontreSeuils = True
-    GraduationMobile = True
-    BordureX = 0.250000000000000000
-    BordureY = 0.250000000000000000
-  end
   object Button1: TButton
     Position.X = 760.000000000000000000
     Position.Y = 232.000000000000000000
@@ -48,8 +17,46 @@ object Form1: TForm1
   end
   object Timer1: TTimer
     Interval = 20
-    OnTimer = Timer1Timer
     Left = 760
     Top = 384
+  end
+  object GraphicXYdeT1: TGraphicXYdeT
+    Position.X = 96.000000000000000000
+    Position.Y = 80.000000000000000000
+    Size.Width = 497.000000000000000000
+    Size.Height = 433.000000000000000000
+    Size.PlatformDefault = False
+    CouleurDernierPoint = Rouge
+    CouleurAxe = Orange
+    CouleurGrille = Bleu
+    CouleurZone = Vert
+    FormatX = '%3.2f'
+    FormatY = '%3.2f'
+    NbValeurs = 200
+    EchelleMaxX = 1.000000000000000000
+    EchelleMinX = -1.000000000000000000
+    EchelleMaxY = 1.000000000000000000
+    EchelleMinY = -1.000000000000000000
+    ZoneMaxX = 0.500000000000000000
+    ZoneMinX = -0.500000000000000000
+    ZoneMaxY = 0.500000000000000000
+    ZoneMinY = -0.500000000000000000
+    EchelleAuto = True
+    Proportionel = False
+    AfficheAxe = False
+    AfficheGrille = False
+    AfficheZone = False
+    AffichePI = True
+    GraduationMajeure = 0.500000000000000000
+    GraduationMineure = 0.100000000000000000
+    LongueurGraduationMajeure = 16
+    LongueurGraduationMineure = 8
+    Surlignage = -1
+  end
+  object Button2: TButton
+    Position.X = 784.000000000000000000
+    Position.Y = 296.000000000000000000
+    Text = 'Button2'
+    OnClick = Button2Click
   end
 end

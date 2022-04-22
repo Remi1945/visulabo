@@ -1,6 +1,5 @@
 unit GraphicXYdeT;
 
-
 interface
 
 uses
@@ -156,7 +155,7 @@ begin
   FLgGrdMin := 8;
   listePI := TList.Create;
   FTextSettingsInfo := TTextSettingsInfo.Create(Self, GetTextSettingsClass);
-  FSurligne:=-1;
+  Fsurligne := -1;
   FNbValeurs := 200;
   for i := 0 to FNbValeurs - 1 do
   begin
@@ -186,7 +185,7 @@ const
 var
   i, j: integer;
   stYmin, stYmax, stXmin, stXmax, st: String;
-  wt,ht,HXtxt, LYtxt: Single;
+  wt, ht, HXtxt, LYtxt: Single;
   HYtxt1, HYtxt0, LXtxt1, LXtxt0: Single;
   Ay, Ax, Ox, Oy, By, Bx, Gx, Gy: Single;
   x0, y0, x1, y1: Single;
@@ -196,7 +195,6 @@ var
   Xc, Yc, xPi, ypi: Single;
   a, b, c: integer;
   lePI: TPi;
-
 
   procedure ValToPoint(v_x, v_y: Single; var px, py: Single);
   var
@@ -385,41 +383,75 @@ begin
   end;
   if FMontrePI then
   begin
-    for i:=0 to listePI.Count-1 do
+    for i := 0 to listePI.Count - 1 do
     begin
-      lePI:=TPi(listePI[i]);
-      st:=lePI.montexte;
-      wt:=Canvas.TextWidth(st);
-      ht:=Canvas.TextHeight(st);
+      lePI := TPi(listePI[i]);
+      st := lePI.montexte;
+      wt := Canvas.TextWidth(st);
+      ht := Canvas.TextHeight(st);
       ValToPoint(lePI.X, lePI.Y, xPi, ypi);
-      Canvas.Fill.Color:=lePI.Couleur;
-      Canvas.FillText(TRectF.Create(xpi+lePi.taille,ypi-lePi.taille,xpi+wt+lePi.taille,ypi+ht-lePi.taille), st, false, 1, [], TTextAlign.Center,
-    TTextAlign.Center);
+      Canvas.Fill.Color := lePI.Couleur;
+      Canvas.FillText(TRectF.Create(xPi + lePI.taille, ypi - lePI.taille,
+        xPi + wt + lePI.taille, ypi + ht - lePI.taille), st, false, 1, [],
+        TTextAlign.Center, TTextAlign.Center);
 
       Canvas.Stroke.Color := lePI.Couleur;
       case lePI.maForme of
         FrmCarre:
-          Canvas.DrawRect(TRectF.Create(xPi - lePI.taille / 2,
-            ypi - lePI.taille / 2, xPi + lePI.taille / 2, ypi + lePI.taille / 2),
-            0, 0, AllCorners, 1);
+          begin
+            Canvas.DrawRect(TRectF.Create(xPi - lePI.taille / 2,
+              ypi - lePI.taille / 2, xPi + lePI.taille / 2,
+              ypi + lePI.taille / 2), 0, 0, AllCorners, 1);
+            if Fsurligne = i then
+            begin
+              Canvas.FillRect(TRectF.Create(xPi - lePI.taille / 2,
+                ypi - lePI.taille / 2, xPi + lePI.taille / 2,
+                ypi + lePI.taille / 2), 0, 0, AllCorners, 1);
+            end;
+          end;
         FrmCercle:
           begin
             Canvas.DrawEllipse(TRectF.Create(xPi - lePI.taille / 2,
               ypi - lePI.taille / 2, xPi + lePI.taille / 2,
               ypi + lePI.taille / 2), 1);
-            if Fsurligne=i then
-              begin
+            if Fsurligne = i then
+            begin
               Canvas.FillEllipse(TRectF.Create(xPi - lePI.taille / 2,
-              ypi - lePI.taille / 2, xPi + lePI.taille / 2,
-              ypi + lePI.taille / 2), 1);
-              end;
+                ypi - lePI.taille / 2, xPi + lePI.taille / 2,
+                ypi + lePI.taille / 2), 1);
+            end;
           end;
         FrmX:
           begin
+            Canvas.DrawLine(TPointF.Create(xPi - lePI.taille / 2,
+              ypi - lePI.taille / 2), TPointF.Create(xPi + lePI.taille / 2,
+              ypi + lePI.taille / 2), 1);
+            Canvas.DrawLine(TPointF.Create(xPi + lePI.taille / 2,
+              ypi - lePI.taille / 2), TPointF.Create(xPi - lePI.taille / 2,
+              ypi + lePI.taille / 2), 1);
+            if Fsurligne = i then
+            begin
+              Canvas.DrawEllipse(TRectF.Create(xPi - lePI.taille / 4,
+                ypi - lePI.taille / 4, xPi + lePI.taille / 4,
+                ypi + lePI.taille / 4), 1);
 
+            end;
           end;
         FrmCroix:
           begin
+           Canvas.DrawLine(TPointF.Create(xPi ,
+              ypi - lePI.taille / 2), TPointF.Create(xPi ,
+              ypi + lePI.taille / 2), 1);
+            Canvas.DrawLine(TPointF.Create(xPi + lePI.taille / 2,
+              ypi ), TPointF.Create(xPi - lePI.taille / 2,
+              ypi ), 1);
+            if Fsurligne = i then
+            begin
+              Canvas.DrawEllipse(TRectF.Create(xPi - lePI.taille / 4,
+                ypi - lePI.taille / 4, xPi + lePI.taille / 4,
+                ypi + lePI.taille / 4), 1);
+
+            end;
           end;
 
       end;
@@ -521,45 +553,78 @@ end;
 // ---------------------------------------------------------------------------
 procedure TGraphicXYdeT.SetMaxiX(Value: double);
 begin
-  FmaxX := Value;
+  if FmaxX <> Value then
+  begin
+    FmaxX := Value;
+    Repaint;
+  end;
 end;
 
 procedure TGraphicXYdeT.SetMiniX(Value: double);
 begin
-  FminX := Value;
+  if FminX <> Value then
+  begin
+    FminX := Value;
+    Repaint;
+  end;
 end;
 
 // ---------------------------------------------------------------------------
 procedure TGraphicXYdeT.SetMaxiY(Value: double);
 begin
-  FmaxY := Value;
+  if FmaxY <> Value then
+  begin
+    FmaxY := Value;
+    Repaint;
+  end;
 end;
 
 procedure TGraphicXYdeT.SetMiniY(Value: double);
 begin
-  FminY := Value;
+  if FminY <> Value then
+  begin
+    FminY := Value;
+    Repaint;
+  end;
 end;
 
 // ---------------------------------------------------------------------------
 procedure TGraphicXYdeT.SetMaxiZX(Value: double);
 begin
-  ZmaxX := Value;
+  if ZmaxX <> Value then
+  begin
+
+    ZmaxX := Value;
+    Repaint;
+  end;
 end;
 
 procedure TGraphicXYdeT.SetMiniZX(Value: double);
 begin
-  ZminX := Value;
+  if ZminX <> Value then
+  begin
+    ZminX := Value;
+    Repaint;
+  end;
 end;
 
 // ---------------------------------------------------------------------------
 procedure TGraphicXYdeT.SetMaxiZY(Value: double);
 begin
-  ZmaxY := Value;
+  if ZmaxY <> Value then
+  begin
+    ZmaxY := Value;
+    Repaint;
+  end;
 end;
 
 procedure TGraphicXYdeT.SetMiniZY(Value: double);
 begin
-  ZminY := Value;
+  if ZminY <> Value then
+  begin
+    ZminY := Value;
+    Repaint;
+  end;
 end;
 
 // ---------------------------------------------------------------------------
@@ -683,4 +748,3 @@ begin
 end;
 
 end.
-
