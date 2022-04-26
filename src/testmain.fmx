@@ -9,42 +9,4 @@ object Form1: TForm1
   FormFactor.Devices = [Desktop]
   OnCreate = FormCreate
   DesignerMasterStyle = 0
-  object Label1: TLabel
-    Position.X = 720.000000000000000000
-    Position.Y = 488.000000000000000000
-    Text = 'Label1'
-    TabOrder = 2
-  end
-  object Histogramme1: THistogramme
-    Position.X = 152.000000000000000000
-    Position.Y = 160.000000000000000000
-    Size.Width = 529.000000000000000000
-    Size.Height = 273.000000000000000000
-    Size.PlatformDefault = False
-    FormatX = '%3.2f'
-    SeuilMax = 20.000000000000000000
-    SeuilMin = 180.000000000000000000
-    MontreSeuils = False
-    MontreGraduationY = False
-    NombreDeClasse = 200
-  end
-  object dblcurs: TDoubleCurseur
-    Position.X = 152.000000000000000000
-    Position.Y = 480.000000000000000000
-    Size.Width = 529.000000000000000000
-    Size.Height = 32.000000000000000000
-    Size.PlatformDefault = False
-    Genre = Horizontal
-    Valeur1 = 4
-    Valeur2 = 75
-    Maximum = 2000
-    Minimum = 4
-  end
-  object Rectangle1: TRectangle
-    Position.X = 616.000000000000000000
-    Position.Y = 88.000000000000000000
-    Size.Width = 50.000000000000000000
-    Size.Height = 50.000000000000000000
-    Size.PlatformDefault = False
-  end
 end
