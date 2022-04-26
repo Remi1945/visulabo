@@ -7,49 +7,44 @@ object Form1: TForm1
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
   DesignerMasterStyle = 0
-  object JaugeRect1: TJaugeRect
-    Position.X = 256.000000000000000000
-    Position.Y = 200.000000000000000000
-    Size.Width = 89.000000000000000000
-    Size.Height = 281.000000000000000000
+  object Label1: TLabel
+    Position.X = 720.000000000000000000
+    Position.Y = 488.000000000000000000
+    Text = 'Label1'
+    TabOrder = 2
+  end
+  object Histogramme1: THistogramme
+    Position.X = 152.000000000000000000
+    Position.Y = 160.000000000000000000
+    Size.Width = 529.000000000000000000
+    Size.Height = 273.000000000000000000
     Size.PlatformDefault = False
-    FormatValeurs = '%2.1f'
-    Genre = Vertcale
-    Cadran = Custom
-    AspectBordure = MAT_BRASS
-    GenreSeuil = SeuilRougeVertRouge
-    EpaisseurBordure = 12
-    EpaisseurSeuil = 20
-    LongueurGraduationMajeure = 16
-    LongueurGraduationMineure = 8
-    Maxi = 40.000000000000000000
-    Dynamique = 20.000000000000000000
-    Mini = -40.000000000000000000
-    Valeur = 29.200000000000000000
-    Seuil_A = 10.000000000000000000
-    Seuil_B = 12.000000000000000000
-    GraduationMajeure = 10.000000000000000000
-    GraduationMineure = 2.000000000000000000
-    MontreGraduationMineure = True
-    MontreGraduationMajeure = True
-    MontreValeurs = True
-    MontreSeuils = True
-    GraduationMobile = True
-    BordureX = 0.250000000000000000
-    BordureY = 0.250000000000000000
+    FormatX = '%3.2f'
+    SeuilMax = 20.000000000000000000
+    SeuilMin = 180.000000000000000000
+    MontreSeuils = False
+    MontreGraduationY = False
+    NombreDeClasse = 200
   end
-  object Button1: TButton
-    Position.X = 760.000000000000000000
-    Position.Y = 232.000000000000000000
-    TabOrder = 1
-    Text = 'Button1'
-    OnClick = Button1Click
+  object dblcurs: TDoubleCurseur
+    Position.X = 152.000000000000000000
+    Position.Y = 480.000000000000000000
+    Size.Width = 529.000000000000000000
+    Size.Height = 32.000000000000000000
+    Size.PlatformDefault = False
+    Genre = Horizontal
+    Valeur1 = 4
+    Valeur2 = 75
+    Maximum = 2000
+    Minimum = 4
   end
-  object Timer1: TTimer
-    Interval = 20
-    OnTimer = Timer1Timer
-    Left = 760
-    Top = 384
+  object Rectangle1: TRectangle
+    Position.X = 616.000000000000000000
+    Position.Y = 88.000000000000000000
+    Size.Width = 50.000000000000000000
+    Size.Height = 50.000000000000000000
+    Size.PlatformDefault = False
   end
 end

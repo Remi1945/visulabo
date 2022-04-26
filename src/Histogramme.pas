@@ -17,7 +17,7 @@ type
     FMontreGradY: boolean;
     FNbBins: integer;
     minX, maxX: double;
-
+    ibinMin, ibinMax: integer;
     Valeurs: array [0 .. 2047] of uint64;
     FTextSettingsInfo: TTextSettingsInfo;
 
@@ -43,6 +43,7 @@ type
     procedure MajValeurs(min, max: integer; var val: array of integer; nbvals: integer; redessine: boolean); overload;
     procedure MajValeurs(var val: array of integer; nbvals: integer; redessine: boolean); overload;
     procedure MajHisto(min, max: double; var val: array of integer; lng: integer; redessine: boolean); overload;
+    procedure MajHisto(min, max: double; redessine: boolean); overload;
     /// <summary>Stores a TTextSettings type object keeping the default values of the text representation properties</summary>
     property DefaultTextSettings: TTextSettings read GetDefaultTextSettings;
 
@@ -86,6 +87,8 @@ begin
     Valeurs[i] := i * 2;
     Valeurs[FNbBins - 1 - i] := Valeurs[i];
   end;
+  ibinMin := 0;
+  ibinMax := FNbBins - 1;
 end;
 
 // ---------------------------------------------------------------------------
@@ -171,6 +174,9 @@ end;
   end;
 }
 
+// Mise à jour des valeur à partir d'une matrice de point de type Word (entier non signé sur 16 bits)
+// Avec exclusion des valeurs en dehors de la plage min-max
+
 procedure THistogramme.MajValeurs(min, max: integer; var val: array of uint16; nbvals: integer; redessine: boolean);
 var
   n, i: integer;
@@ -189,12 +195,16 @@ begin
   end;
   minX := min;
   maxX := max;
+  ibinMin := 0;
+  ibinMax := FNbBins - 1;
   if (redessine) then
   begin
     Repaint();
   end;
 end;
 
+// Mise à jour des valeur à partir d'une matrice de point de type Word (entier non signé sur 16 bits)
+// Avec détermination de la plage min-max
 procedure THistogramme.MajValeurs(var val: array of uint16; nbvals: integer; redessine: boolean);
 var
   i: integer;
@@ -210,6 +220,9 @@ begin
   end;
   MajValeurs(round(minX), round(maxX), val, nbvals, redessine);
 end;
+
+// Mise à jour des valeur à partir d'une matrice de point de type Integer (entier signé sur 32 bits)
+// Avec exclusion des valeurs en dehors de la plage min-max
 
 procedure THistogramme.MajValeurs(min, max: integer; var val: array of integer; nbvals: integer; redessine: boolean);
 var
@@ -229,12 +242,17 @@ begin
   end;
   minX := min;
   maxX := max;
+  ibinMin := 0;
+  ibinMax := FNbBins - 1;
   if (redessine) then
   begin
     Repaint();
   end;
 end;
 
+// Mise à jour des valeur à partir d'un histograme
+// Avec détermination de la plage min-max
+// !!!!!!!!!!!!!!!!! A REVOIR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 procedure THistogramme.MajValeurs(var val: array of integer; nbvals: integer; redessine: boolean);
 var
   i: integer;
@@ -252,7 +270,7 @@ begin
 end;
 
 // ---------------------------------------------------------------------------
-
+// Mise à jour de l'histogramme avec des valeurs issue d'un histograme
 procedure THistogramme.MajHisto(min, max: double; var val: array of integer; lng: integer; redessine: boolean);
 var
   i: integer;
@@ -265,10 +283,31 @@ begin
     end;
     minX := min;
     maxX := max;
+    ibinMin := 0;
+    ibinMax := FNbBins - 1;
     if (redessine) then
     begin
       Repaint();
     end;
+  end;
+end;
+
+procedure THistogramme.MajHisto(min, max: double; redessine: boolean);
+begin
+  ibinMin := trunc((min - minX) * FNbBins / (maxX - minX));
+  if ibinMin < 0 then
+    ibinMin := 0;
+  if ibinMin > FNbBins then
+    ibinMin := FNbBins - 1;
+  ibinMax := round((max - minX) * FNbBins / (maxX - minX));
+  if ibinMax < 0 then
+    ibinMax := 0;
+  if ibinMax > FNbBins then
+    ibinMax := FNbBins - 1;
+
+  if (redessine) then
+  begin
+    Repaint();
   end;
 end;
 
@@ -291,8 +330,9 @@ var
   ig: integer;
   valG, xGrad, Hgrad, Wgrad: Single;
   deci: double;
-  ndeci, ng0, ng1: integer;
+  nbbins, ndeci, ng0, ng1: integer;
   ygrd, limgradx: Single;
+  grad0: double;
 
 begin
   maxY := -1;
@@ -313,8 +353,17 @@ begin
   Canvas.BeginScene();
   stYmin := '0';
   stYmax := Format('%d', [maxY]);
-  stXmin := Format(FormatX, [minX]);
-  stXmax := Format(FormatX, [maxX]);
+  if (ibinMin = 0) and (ibinMax = FNbBins - 1) then
+  begin
+
+    stXmin := Format(FormatX, [minX]);
+    stXmax := Format(FormatX, [maxX]);
+  end
+  else
+  begin
+    stXmin := Format(FormatX, [ibinmin * (maxX - minX) / FNbBins + minX]);
+    stXmax := Format(FormatX, [ibinmax * (maxX - minX) / FNbBins + minX]);
+  end;
 
   // Fond transparent
   br := TBrush.Create(TBrushKind.Solid, 0);
@@ -342,23 +391,42 @@ begin
   By := Oy;
   Bx := Width - marge - LXtxt1 / 2 - marge;
 
-  cAx := (Bx - Ox) / (FNbBins - 1);
   cAy := (Oy - Ay) / maxY;
   x0 := Ox;
   y0 := Ay * Valeurs[0] + Oy;
-
-  setLength(pol, FNbBins + 3);
-  x := Ox;
-  y := Oy;
-  pol[0] := TPointF.Create(Ox, Oy);
-  for i := 0 to FNbBins - 1 do
+  if (ibinMin = 0) and (ibinMax = FNbBins - 1) then
   begin
-    y := Oy - cAy * Valeurs[i];
-    pol[i + 1] := TPointF.Create(x, y);
-    x := x + cAx;
+    cAx := (Bx - Ox) / (FNbBins - 1);
+    setLength(pol, FNbBins + 3);
+    x := Ox;
+    y := Oy;
+    pol[0] := TPointF.Create(Ox, Oy);
+    for i := 0 to FNbBins - 1 do
+    begin
+      y := Oy - cAy * Valeurs[i];
+      pol[i + 1] := TPointF.Create(x, y);
+      x := x + cAx;
+    end;
+    pol[FNbBins + 1] := TPointF.Create(x - cAx, By);
+    pol[FNbBins + 2] := TPointF.Create(Ox, Oy);
+  end
+  else
+  begin
+    nbbins := ibinMax - ibinMin + 1;
+    cAx := (Bx - Ox) / (nbbins - 1);
+    setLength(pol, nbbins + 3);
+    x := Ox;
+    y := Oy;
+    pol[0] := TPointF.Create(Ox, Oy);
+    for i := ibinMin to ibinMax do
+    begin
+      y := Oy - cAy * Valeurs[i];
+      pol[i + 1 - ibinMin] := TPointF.Create(x, y);
+      x := x + cAx;
+    end;
+    pol[nbbins + 1] := TPointF.Create(x - cAx, By);
+    pol[nbbins + 2] := TPointF.Create(Ox, Oy);
   end;
-  pol[FNbBins + 1] := TPointF.Create(x - cAx, By);
-  pol[FNbBins + 2] := TPointF.Create(Ox, Oy);
   Canvas.Fill := Fill;
   Canvas.FillPolygon(pol, 1);
 
@@ -389,7 +457,16 @@ begin
   Canvas.Stroke.Color := Stroke.Color;
   Canvas.Stroke.Dash := TStrokeDash.Solid;
 {$IFDEF GRADSIMPLE}
-  amplitude := (maxX - minX);
+  if (ibinMin = 0) and (ibinMax = FNbBins - 1) then
+  begin
+    amplitude := (maxX - minX);
+    grad0 := minX;
+  end
+  else
+  begin
+    amplitude := (maxX - minX) / FNbBins * (ibinMax - ibinMin);
+    grad0 := ibinMin * (maxX - minX) / FNbBins + minX;
+  end;
   if amplitude > 0 then
   begin
     grad := amplitude / 5;
@@ -401,7 +478,7 @@ begin
     while (xGrad < Bx) do
     begin
       Canvas.DrawLine(TPointF.Create(xGrad, Oy), TPointF.Create(xGrad, Oy + 5), 100);
-      stGrad := Format(FormatX, [round(valG) + minX]);
+      stGrad := Format(FormatX, [round(valG) + grad0]);
       Hgrad := Canvas.TextHeight(stGrad);
       Wgrad := Canvas.TextWidth(stGrad);
       Canvas.FillText(TRectF.Create(xGrad - Wgrad / 2, Oy + 5, xGrad + Wgrad / 2, Oy + 8 + Hgrad), stGrad, false, 1, [],
