@@ -27,6 +27,7 @@ type
     FMontrePI: boolean;
     FCarre: boolean;
     FAxe: boolean;
+    FShowTrace: boolean;
     FGrille: boolean;
     FminY, FmaxY: double;
     FminX, FmaxX: double;
@@ -54,6 +55,7 @@ type
     procedure SetCarre(Value: boolean);
     procedure SetGrille(Value: boolean);
     procedure SetAxe(Value: boolean);
+    procedure SetShowTrace(Value: boolean);
     procedure SetTitre(Value: String);
     procedure SetZone(Value: boolean);
     procedure SetNbValeurs(nb: integer);
@@ -97,6 +99,7 @@ type
     property EchelleAuto: boolean read FEchelleAuto write SetEchelleAuto;
     property Proportionel: boolean read FCarre write SetCarre;
     property AfficheAxe: boolean read FAxe write SetAxe;
+    property AfficheTrace: boolean read FShowTrace write SetShowTrace;
     property AfficheGrille: boolean read FGrille write SetGrille;
     property AfficheZone: boolean read FZone write SetZone;
     property AffichePI: boolean read FMontrePI write FMontrePI;
@@ -135,6 +138,7 @@ begin
   FFormatY := '%3.2f';
   FEchelleAuto := true;
   FMontrePI := false;
+  FShowTrace := true;
   FminX := -1;
   FmaxX := 1;
   FminY := -1;
@@ -271,20 +275,23 @@ begin
   rect.Right := Bx;
   rect.Bottom := By;
   Canvas.FillRect(rect, 0, 0, AllCorners, 100);
-
-  Canvas.Stroke.Color := Stroke.Color;
-  Canvas.Stroke.Thickness := 2;
-  ValToPoint(ValeursX[0], ValeursY[0], x0, y0);
-  p0.SetLocation(x0, y0);
-  for i := 1 to FNbValeurs - 1 do
+  if FShowTrace then
   begin
-    ValToPoint(ValeursX[i], ValeursY[i], x1, y1);
-    p1.SetLocation(x1, y1);
-    Canvas.DrawLine(p0, p1, 1);
-    p0.SetLocation(x1, y1);
+    Canvas.Stroke.Color := Stroke.Color;
+    Canvas.Stroke.Thickness := 2;
+    ValToPoint(ValeursX[0], ValeursY[0], x0, y0);
+    p0.SetLocation(x0, y0);
+    for i := 1 to FNbValeurs - 1 do
+    begin
+      ValToPoint(ValeursX[i], ValeursY[i], x1, y1);
+      p1.SetLocation(x1, y1);
+      Canvas.DrawLine(p0, p1, 1);
+      p0.SetLocation(x1, y1);
+    end;
+    Canvas.Stroke.Color := setCoul(FcoulDerPts);
+    Canvas.DrawEllipse(TRectF.Create(p0.X - 4, p0.Y - 4, p0.X + 4,
+      p0.Y + 4), 1);
   end;
-  Canvas.Stroke.Color := setCoul(FcoulDerPts);
-  Canvas.DrawEllipse(TRectF.Create(p0.X - 4, p0.Y - 4, p0.X + 4, p0.Y + 4), 1);
   // Point centrale de la grille ou de l'axe
   if (FmaxX > 0) and (FminX < 0) then
     Xc := 0
@@ -439,12 +446,10 @@ begin
           end;
         FrmCroix:
           begin
-           Canvas.DrawLine(TPointF.Create(xPi ,
-              ypi - lePI.taille / 2), TPointF.Create(xPi ,
-              ypi + lePI.taille / 2), 1);
-            Canvas.DrawLine(TPointF.Create(xPi + lePI.taille / 2,
-              ypi ), TPointF.Create(xPi - lePI.taille / 2,
-              ypi ), 1);
+            Canvas.DrawLine(TPointF.Create(xPi, ypi - lePI.taille / 2),
+              TPointF.Create(xPi, ypi + lePI.taille / 2), 1);
+            Canvas.DrawLine(TPointF.Create(xPi + lePI.taille / 2, ypi),
+              TPointF.Create(xPi - lePI.taille / 2, ypi), 1);
             if Fsurligne = i then
             begin
               Canvas.DrawEllipse(TRectF.Create(xPi - lePI.taille / 4,
@@ -633,6 +638,11 @@ procedure TGraphicXYdeT.SetNbValeurs(nb: integer);
 begin
   if (nb > 0) and (nb <= 200) then
     FNbValeurs := nb;
+end;
+
+procedure TGraphicXYdeT.SetShowTrace(Value: boolean);
+begin
+  FShowTrace := Value;
 end;
 
 procedure TGraphicXYdeT.SetSurlignage(num: integer);
