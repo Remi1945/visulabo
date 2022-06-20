@@ -184,7 +184,7 @@ const
   marge = 4;
 var
   i, j: integer;
-  stYmin, stYmax, stXmin, stXmax, st: String;
+  stXmin, stXmax, st: String;
   wt, ht, HXtxt, LYtxt: Single;
   HYtxt1, HYtxt0, LXtxt1, LXtxt0: Single;
   Ay, Ax, Ox, Oy, By, Bx, Gx, Gy: Single;
@@ -221,8 +221,8 @@ begin
 
   stXmin := Format(FormatX, [FminX]) + UniteX;
   stXmax := Format(FormatX, [FmaxX]) + UniteX;
-  stYmin := Format(FormatY, [FminY]) + UniteY;
-  stYmax := Format(FormatY, [FmaxY]) + UniteY;
+  //stYmin := Format(FormatY, [FminY]) + UniteY;
+  //stYmax := Format(FormatY, [FmaxY]) + UniteY;
 
   Canvas.Font.Family := TextSettings.Font.Family;
   Canvas.Font.Size := TextSettings.Font.Size;
@@ -234,12 +234,14 @@ begin
   if Canvas.TextHeight(stXmax) > HXtxt then
     HXtxt := Canvas.TextHeight(stXmax);
 
-  LYtxt := Canvas.TextWidth(stYmin);
-  if Canvas.TextWidth(stYmax) > LYtxt then
-    LYtxt := Canvas.TextWidth(stYmax);
-
-  HYtxt1 := Canvas.TextHeight(stYmax);
-  HYtxt0 := Canvas.TextHeight(stYmin);
+  //LYtxt := Canvas.TextWidth(stYmin);
+  //if Canvas.TextWidth(stYmax) > LYtxt then
+    //LYtxt := Canvas.TextWidth(stYmax);
+  LyTxt:=0;
+  //HYtxt1 := Canvas.TextHeight(stYmax);
+  //HYtxt0 := Canvas.TextHeight(stYmin);
+  HYtxt1:=0;
+            HYtxt0:=0;
   LXtxt1 := Canvas.TextWidth(stXmax);
   LXtxt0 := Canvas.TextWidth(stXmin);
   Ay := marge + HYtxt1 / 2;
@@ -464,12 +466,10 @@ begin
   rect.Bottom := rect.Top + HYtxt1;
   Canvas.Fill.Color := TextSettings.FontColor;
 
-  Canvas.FillText(rect, stYmax, false, 1, [], TTextAlign.Center,
-    TTextAlign.Center);
+  //Canvas.FillText(rect, stYmax, false, 1, [], TTextAlign.Center, TTextAlign.Center);
 
   rect.SetLocation(marge, Oy - HYtxt0 / 2);
-  Canvas.FillText(rect, stYmin, false, 1, [], TTextAlign.Leading,
-    TTextAlign.Center);
+  //Canvas.FillText(rect, stYmin, false, 1, [], TTextAlign.Leading, TTextAlign.Center);
 
   rect.SetLocation(Ox - LXtxt0 / 2, Oy + marge);
   rect.Width := LXtxt0;

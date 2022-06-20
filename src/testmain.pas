@@ -4,22 +4,23 @@ interface
 
 uses
   System.SysUtils, System.Types, System.UITypes, System.Classes,
-  System.Variants,  Pointinteret,
+  System.Variants, Pointinteret,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Objects,
-  JaugeCir, FMX.Controls.Presentation, FMX.StdCtrls, JaugeRect, GraphicXYdeT;
+  JaugeCir, FMX.Controls.Presentation, FMX.StdCtrls, JaugeRect, GraphicXYdeT,
+  Histogramme;
 
 type
   TForm1 = class(TForm)
     Button1: TButton;
     Timer1: TTimer;
-    GraphicXYdeT1: TGraphicXYdeT;
     Button2: TButton;
+    grHisto: THistogramme;
     procedure Button1Click(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
   private
     { Déclarations privées }
-  public
-    { Déclarations publiques }
+    histo1, histo2: array [0 .. 511] of integer;
+    un: boolean;
   end;
 
 var
@@ -30,14 +31,28 @@ implementation
 {$R *.fmx}
 
 procedure TForm1.Button1Click(Sender: TObject);
+var
+  I: integer;
 begin
-//Timer1.Enabled:=not(Timer1.Enabled);
-GraphicXYdeT1.AjoutePI(TPI.Create('Test',0.2,0.4,TForme.FrmX,$FFFF0000,16),true);
+  for I := 0 to 511 do
+  begin
+    histo1[I] := 0;
+    histo2[I] := 0;
+  end;
+  histo1[125] := 100;
+  histo2[125] := 2000;
+  grHisto.MajHisto(0, 511, histo1, 512, true);
+  Timer1.Enabled := true;
 end;
 
-procedure TForm1.Button2Click(Sender: TObject);
+procedure TForm1.Timer1Timer(Sender: TObject);
 begin
-GraphicXYdeT1.Surlignage:=0;
+  if un then
+    grHisto.MajHisto(0, 511, histo1, 512, true)
+  else
+    grHisto.MajHisto(0, 511, histo2, 512, true);
+  un := not(un);
+
 end;
 
 end.
