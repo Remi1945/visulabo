@@ -47,6 +47,7 @@ contains
   PropLayout in 'PropLayout.pas',
   JaugeRect in 'JaugeRect.pas',
   DoubleCurseur in 'DoubleCurseur.pas',
-  PointInteret in 'PointInteret.pas';
+  PointInteret in 'PointInteret.pas',
+  Radar in 'Radar.pas';
 
 end.

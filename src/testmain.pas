@@ -7,16 +7,18 @@ uses
   System.Variants, Pointinteret,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Objects,
   JaugeCir, FMX.Controls.Presentation, FMX.StdCtrls, JaugeRect, GraphicXYdeT,
-  Histogramme;
+  Histogramme, Radar;
 
 type
   TForm1 = class(TForm)
     Button1: TButton;
     Timer1: TTimer;
     Button2: TButton;
-    grHisto: THistogramme;
-    procedure Button1Click(Sender: TObject);
-    procedure Timer1Timer(Sender: TObject);
+    Radar1: TRadar;
+    GraphicXYdeT1: TGraphicXYdeT;
+   // procedure Button1Click(Sender: TObject);
+    //procedure Timer1Timer(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
   private
     { Déclarations privées }
     histo1, histo2: array [0 .. 511] of integer;
@@ -29,7 +31,7 @@ var
 implementation
 
 {$R *.fmx}
-
+{
 procedure TForm1.Button1Click(Sender: TObject);
 var
   I: integer;
@@ -44,7 +46,15 @@ begin
   grHisto.MajHisto(0, 511, histo1, 512, true);
   Timer1.Enabled := true;
 end;
-
+ }
+procedure TForm1.Button2Click(Sender: TObject);
+var
+ myPI:TPi;
+begin
+ myPi:=TPi.Create('0deg',30/180*PI,0.25,TForme.FrmCercle,$FFFF0000,4);
+  Radar1.AjoutePI(myPi,true);
+end;
+ {
 procedure TForm1.Timer1Timer(Sender: TObject);
 begin
   if un then
@@ -54,5 +64,5 @@ begin
   un := not(un);
 
 end;
-
+  }
 end.
