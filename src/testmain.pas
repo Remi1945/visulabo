@@ -16,9 +16,11 @@ type
     Button2: TButton;
     Radar1: TRadar;
     GraphicXYdeT1: TGraphicXYdeT;
-   // procedure Button1Click(Sender: TObject);
-    //procedure Timer1Timer(Sender: TObject);
+    vue: TImage;
+    // procedure Button1Click(Sender: TObject);
+    // procedure Timer1Timer(Sender: TObject);
     procedure Button2Click(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
   private
     { Déclarations privées }
     histo1, histo2: array [0 .. 511] of integer;
@@ -31,38 +33,54 @@ var
 implementation
 
 {$R *.fmx}
+
 {
-procedure TForm1.Button1Click(Sender: TObject);
-var
+  procedure TForm1.Button1Click(Sender: TObject);
+  var
   I: integer;
-begin
+  begin
   for I := 0 to 511 do
   begin
-    histo1[I] := 0;
-    histo2[I] := 0;
+  histo1[I] := 0;
+  histo2[I] := 0;
   end;
   histo1[125] := 100;
   histo2[125] := 2000;
   grHisto.MajHisto(0, 511, histo1, 512, true);
   Timer1.Enabled := true;
+  end;
+}
+procedure TForm1.Button1Click(Sender: TObject);
+var
+  bmp: TBitmap;
+begin
+  bmp := TBitmap.Create(200, 200);
+  bmp.Canvas.BeginScene;
+  bmp.Canvas.Fill.Color:=$FFFF0000;
+  bmp.Canvas.FillArc(TPointF.Create(100, 100), TPointF.Create(50, 50),
+    60, 25, 1);
+  bmp.Canvas.EndScene;
+  vue.Bitmap.Assign(bmp);
 end;
- }
+
 procedure TForm1.Button2Click(Sender: TObject);
 var
- myPI:TPi;
+  myPI: TPi;
 begin
- myPi:=TPi.Create('0deg',30/180*PI,0.25,TForme.FrmCercle,$FFFF0000,4);
-  Radar1.AjoutePI(myPi,true);
+  myPI := TPi.Create('0deg', 30 / 180 * PI, 0.25, TForme.FrmCercle,
+    $FFFF0000, 4);
+  Radar1.AjoutePI(myPI, true);
 end;
- {
-procedure TForm1.Timer1Timer(Sender: TObject);
-begin
+
+{
+  procedure TForm1.Timer1Timer(Sender: TObject);
+  begin
   if un then
-    grHisto.MajHisto(0, 511, histo1, 512, true)
+  grHisto.MajHisto(0, 511, histo1, 512, true)
   else
-    grHisto.MajHisto(0, 511, histo2, 512, true);
+  grHisto.MajHisto(0, 511, histo2, 512, true);
   un := not(un);
 
-end;
-  }
+  end;
+}
 end.

@@ -3,26 +3,27 @@ object Form1: TForm1
   Top = 0
   Caption = 'Form1'
   ClientHeight = 728
-  ClientWidth = 931
+  ClientWidth = 1104
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
   DesignerMasterStyle = 0
   object Button1: TButton
-    Position.X = 760.000000000000000000
-    Position.Y = 232.000000000000000000
+    Position.X = 1008.000000000000000000
+    Position.Y = 336.000000000000000000
     TabOrder = 1
     Text = 'Button1'
+    OnClick = Button1Click
   end
   object Timer1: TTimer
     Enabled = False
     Interval = 20
-    Left = 760
-    Top = 384
+    Left = 1048
+    Top = 560
   end
   object Button2: TButton
-    Position.X = 784.000000000000000000
-    Position.Y = 296.000000000000000000
+    Position.X = 1008.000000000000000000
+    Position.Y = 368.000000000000000000
     Text = 'Button2'
     OnClick = Button2Click
   end
@@ -40,14 +41,18 @@ object Form1: TForm1
     Fill.Gradient.StartPosition.Y = 0.149896234273910500
     Fill.Gradient.StopPosition.X = 1.000000000000000000
     Fill.Gradient.StopPosition.Y = 0.850103735923767100
-    Position.X = 184.000000000000000000
-    Position.Y = 216.000000000000000000
-    Size.Width = 449.000000000000000000
-    Size.Height = 305.000000000000000000
+    Position.X = 16.000000000000000000
+    Position.Y = 184.000000000000000000
+    Size.Width = 513.000000000000000000
+    Size.Height = 393.000000000000000000
     Size.PlatformDefault = False
     CouleurRayon = Vert
     CouleurCercles = Blanc
+    Direction = 45.000000000000000000
+    LargeurVisee = 20.000000000000000000
     AffichePI = True
+    Affichedir = True
+    AfficheVisee = True
     Surlignage = -1
   end
   object GraphicXYdeT1: TGraphicXYdeT
@@ -82,5 +87,15 @@ object Form1: TForm1
     LongueurGraduationMajeure = 16
     LongueurGraduationMineure = 8
     Surlignage = -1
+  end
+  object vue: TImage
+    MultiResBitmap = <
+      item
+      end>
+    Position.X = 560.000000000000000000
+    Position.Y = 24.000000000000000000
+    Size.Width = 385.000000000000000000
+    Size.Height = 337.000000000000000000
+    Size.PlatformDefault = False
   end
 end
