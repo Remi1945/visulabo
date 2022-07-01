@@ -24,6 +24,8 @@ type
     procedure SetNbCercles(nb: integer);
     procedure SetNbSecteurs(nb: integer);
     procedure SetSurlignage(num: integer);
+    procedure SetDirection(ndir: Single);
+    procedure SetVisee(ndir: Single);
     function GetDefaultTextSettings: TTextSettings;
     function GetTextSettings: TTextSettings;
     function GetTextSettingsClass: TTextSettingsInfo.TCustomTextSettingsClass;
@@ -40,14 +42,13 @@ type
 
     property CouleurRayon: TCouls read FcoulRayons write FcoulRayons;
     property CouleurCercles: TCouls read FcoulCercles write FcoulCercles;
-    property Direction: Single read Fdir write Fdir;
-    property Visee: Single read Fvisee write Fvisee;
+    property Direction: Single read Fdir write SetDirection;
+    property Visee: Single read Fvisee write setVisee;
     property LargeurVisee: Single read FdeltaVisee write FdeltaVisee;
     property AffichePI: boolean read FMontrePI write FMontrePI;
     property Affichedir: boolean read FMontreDir write FMontreDir;
     property AfficheVisee: boolean read FMontreVise write FMontreVise;
-    property TextSettings: TTextSettings read GetTextSettings
-      write SetTextSettings;
+    property TextSettings: TTextSettings read GetTextSettings write SetTextSettings;
     property Surlignage: integer read Fsurligne write SetSurlignage;
   end;
 
@@ -144,8 +145,7 @@ begin
 
   Canvas.Fill := Fill;
 
-  Canvas.FillEllipse(TRectF.Create(Xc - rmax, Yc - rmax, Xc + rmax,
-    Yc + rmax), 1);
+  Canvas.FillEllipse(TRectF.Create(Xc - rmax, Yc - rmax, Xc + rmax, Yc + rmax), 1);
 
   if FNbSecteurs > 0 then
   begin
@@ -164,8 +164,7 @@ begin
     dr := rmax / FNbCercles;
     for i := 1 to FNbCercles do
     begin
-      Canvas.DrawEllipse(TRectF.Create(Xc - dr * i, Yc - dr * i, Xc + dr * i,
-        Yc + dr * i), 1);
+      Canvas.DrawEllipse(TRectF.Create(Xc - dr * i, Yc - dr * i, Xc + dr * i, Yc + dr * i), 1);
     end;
   end;
 
@@ -179,62 +178,51 @@ begin
       ht := Canvas.TextHeight(st);
       ValToPoint(lePI.X, lePI.Y, xPi, ypi);
       Canvas.Fill.Color := lePI.Couleur;
-      Canvas.FillText(TRectF.Create(xPi + lePI.taille, ypi - lePI.taille,
-        xPi + wt + lePI.taille, ypi + ht - lePI.taille), st, false, 1, [],
-        TTextAlign.Center, TTextAlign.Center);
+      Canvas.FillText(TRectF.Create(xPi + lePI.taille, ypi - lePI.taille, xPi + wt + lePI.taille,
+        ypi + ht - lePI.taille), st, false, 1, [], TTextAlign.Center, TTextAlign.Center);
 
       Canvas.Stroke.Color := lePI.Couleur;
       case lePI.maForme of
         FrmCarre:
           begin
-            Canvas.DrawRect(TRectF.Create(xPi - lePI.taille / 2,
-              ypi - lePI.taille / 2, xPi + lePI.taille / 2,
+            Canvas.DrawRect(TRectF.Create(xPi - lePI.taille / 2, ypi - lePI.taille / 2, xPi + lePI.taille / 2,
               ypi + lePI.taille / 2), 0, 0, AllCorners, 1);
             if Fsurligne = i then
             begin
-              Canvas.FillRect(TRectF.Create(xPi - lePI.taille / 2,
-                ypi - lePI.taille / 2, xPi + lePI.taille / 2,
+              Canvas.FillRect(TRectF.Create(xPi - lePI.taille / 2, ypi - lePI.taille / 2, xPi + lePI.taille / 2,
                 ypi + lePI.taille / 2), 0, 0, AllCorners, 1);
             end;
           end;
         FrmCercle:
           begin
-            Canvas.DrawEllipse(TRectF.Create(xPi - lePI.taille / 2,
-              ypi - lePI.taille / 2, xPi + lePI.taille / 2,
+            Canvas.DrawEllipse(TRectF.Create(xPi - lePI.taille / 2, ypi - lePI.taille / 2, xPi + lePI.taille / 2,
               ypi + lePI.taille / 2), 1);
             if Fsurligne = i then
             begin
-              Canvas.FillEllipse(TRectF.Create(xPi - lePI.taille / 2,
-                ypi - lePI.taille / 2, xPi + lePI.taille / 2,
+              Canvas.FillEllipse(TRectF.Create(xPi - lePI.taille / 2, ypi - lePI.taille / 2, xPi + lePI.taille / 2,
                 ypi + lePI.taille / 2), 1);
             end;
           end;
         FrmX:
           begin
-            Canvas.DrawLine(TPointF.Create(xPi - lePI.taille / 2,
-              ypi - lePI.taille / 2), TPointF.Create(xPi + lePI.taille / 2,
-              ypi + lePI.taille / 2), 1);
-            Canvas.DrawLine(TPointF.Create(xPi + lePI.taille / 2,
-              ypi - lePI.taille / 2), TPointF.Create(xPi - lePI.taille / 2,
-              ypi + lePI.taille / 2), 1);
+            Canvas.DrawLine(TPointF.Create(xPi - lePI.taille / 2, ypi - lePI.taille / 2),
+              TPointF.Create(xPi + lePI.taille / 2, ypi + lePI.taille / 2), 1);
+            Canvas.DrawLine(TPointF.Create(xPi + lePI.taille / 2, ypi - lePI.taille / 2),
+              TPointF.Create(xPi - lePI.taille / 2, ypi + lePI.taille / 2), 1);
             if Fsurligne = i then
             begin
-              Canvas.DrawEllipse(TRectF.Create(xPi - lePI.taille / 4,
-                ypi - lePI.taille / 4, xPi + lePI.taille / 4,
+              Canvas.DrawEllipse(TRectF.Create(xPi - lePI.taille / 4, ypi - lePI.taille / 4, xPi + lePI.taille / 4,
                 ypi + lePI.taille / 4), 1);
 
             end;
           end;
         FrmCroix:
           begin
-            Canvas.DrawLine(TPointF.Create(xPi, ypi - lePI.taille / 2),
-              TPointF.Create(xPi, ypi + lePI.taille / 2), 1);
-            Canvas.DrawLine(TPointF.Create(xPi + lePI.taille / 2, ypi),
-              TPointF.Create(xPi - lePI.taille / 2, ypi), 1);
+            Canvas.DrawLine(TPointF.Create(xPi, ypi - lePI.taille / 2), TPointF.Create(xPi, ypi + lePI.taille / 2), 1);
+            Canvas.DrawLine(TPointF.Create(xPi + lePI.taille / 2, ypi), TPointF.Create(xPi - lePI.taille / 2, ypi), 1);
             if Fsurligne = i then
             begin
-              Canvas.DrawEllipse(TRectF.Create(xPi - lePI.taille / 4,
-                ypi - lePI.taille / 4, xPi + lePI.taille / 4,
+              Canvas.DrawEllipse(TRectF.Create(xPi - lePI.taille / 4, ypi - lePI.taille / 4, xPi + lePI.taille / 4,
                 ypi + lePI.taille / 4), 1);
 
             end;
@@ -246,12 +234,12 @@ begin
 
   if FMontreVise then
   begin
-    //bmp := TBitmap.Create(round(Width), round(Height));
-    //bmp.Canvas.BeginScene;
-    //br := TBrush.Create(TBrushKind.Solid, 0);
-    //rect := TRectF.Create(0, 0, Width, Height);
-    //bmp.Canvas.FillRect(rect, 0, 0, AllCorners, 100, br);
-    //br.Free;
+    // bmp := TBitmap.Create(round(Width), round(Height));
+    // bmp.Canvas.BeginScene;
+    // br := TBrush.Create(TBrushKind.Solid, 0);
+    // rect := TRectF.Create(0, 0, Width, Height);
+    // bmp.Canvas.FillRect(rect, 0, 0, AllCorners, 100, br);
+    // br.Free;
     alpha0 := Fvisee - FdeltaVisee;
     dalpha := 2 * FdeltaVisee / 128;
     setLength(poly, 128 + 3);
@@ -263,10 +251,9 @@ begin
       alpha := (alpha0 + dalpha * i) / 180 * PI;
       poly[i + 1] := TPointF.Create(rmax * sin(alpha) + Xc, Yc - rmax * cos(alpha));
     end;
-    Canvas.FillPolygon(poly,0.5);
+    Canvas.FillPolygon(poly, 0.5);
     Canvas.Stroke.Color := claBlack;
     Canvas.Stroke.Dash := TStrokeDash.Dash;
-
 
     x1 := rmax * sin((Fvisee + FdeltaVisee) / 180 * PI) + Xc;
     y1 := Yc - rmax * cos((Fvisee + FdeltaVisee) / 180 * PI);
@@ -288,8 +275,7 @@ begin
     setLength(poly, 8);
     for i := 0 to 7 do
     begin
-      poly[i] := TPointF.Create(Xc + Xfleche[i] * vx + Yfleche[i] * ux,
-        Yc + Xfleche[i] * vy + Yfleche[i] * uy);
+      poly[i] := TPointF.Create(Xc + Xfleche[i] * vx + Yfleche[i] * ux, Yc + Xfleche[i] * vy + Yfleche[i] * uy);
     end;
     Canvas.Fill.Color := claBlack;
     Canvas.Fill.Kind := TBrushKind.Solid;
@@ -307,6 +293,16 @@ begin
     Fsurligne := num
   else
     Fsurligne := -1;
+  Repaint;
+end;
+
+procedure TRadar.SetDirection(ndir: Single);
+begin
+  Fdir := ndir;
+  while Fdir < 0 do
+    Fdir := Fdir + 360;
+  while Fdir > 360 do
+    Fdir := Fdir - 360;
   Repaint;
 end;
 
@@ -343,8 +339,17 @@ begin
   FTextSettingsInfo.TextSettings.Assign(Value);
 end;
 
-function TRadar.GetTextSettingsClass
-  : TTextSettingsInfo.TCustomTextSettingsClass;
+procedure TRadar.SetVisee(ndir: Single);
+begin
+  FVisee := ndir;
+  while FVisee < 0 do
+    FVisee := FVisee + 360;
+  while FVisee > 360 do
+    FVisee := FVisee - 360;
+  Repaint;
+end;
+
+function TRadar.GetTextSettingsClass: TTextSettingsInfo.TCustomTextSettingsClass;
 begin
   result := TTextControlTextSettings;
 end;

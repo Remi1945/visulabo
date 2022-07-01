@@ -16,11 +16,10 @@ type
     Button2: TButton;
     Radar1: TRadar;
     GraphicXYdeT1: TGraphicXYdeT;
-    vue: TImage;
     // procedure Button1Click(Sender: TObject);
     // procedure Timer1Timer(Sender: TObject);
     procedure Button2Click(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
   private
     { Déclarations privées }
     histo1, histo2: array [0 .. 511] of integer;
@@ -50,19 +49,6 @@ implementation
   Timer1.Enabled := true;
   end;
 }
-procedure TForm1.Button1Click(Sender: TObject);
-var
-  bmp: TBitmap;
-begin
-  bmp := TBitmap.Create(200, 200);
-  bmp.Canvas.BeginScene;
-  bmp.Canvas.Fill.Color:=$FFFF0000;
-  bmp.Canvas.FillArc(TPointF.Create(100, 100), TPointF.Create(50, 50),
-    60, 25, 1);
-  bmp.Canvas.EndScene;
-  vue.Bitmap.Assign(bmp);
-end;
-
 procedure TForm1.Button2Click(Sender: TObject);
 var
   myPI: TPi;
@@ -70,6 +56,11 @@ begin
   myPI := TPi.Create('0deg', 30 / 180 * PI, 0.25, TForme.FrmCercle,
     $FFFF0000, 4);
   Radar1.AjoutePI(myPI, true);
+end;
+
+procedure TForm1.Timer1Timer(Sender: TObject);
+begin
+radar1.Visee:=radar1.Visee+1;
 end;
 
 {

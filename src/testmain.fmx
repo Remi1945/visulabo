@@ -13,11 +13,10 @@ object Form1: TForm1
     Position.Y = 336.000000000000000000
     TabOrder = 1
     Text = 'Button1'
-    OnClick = Button1Click
   end
   object Timer1: TTimer
-    Enabled = False
     Interval = 20
+    OnTimer = Timer1Timer
     Left = 1048
     Top = 560
   end
@@ -40,7 +39,7 @@ object Form1: TForm1
       end>
     Fill.Gradient.StartPosition.Y = 0.149896234273910500
     Fill.Gradient.StopPosition.X = 1.000000000000000000
-    Fill.Gradient.StopPosition.Y = 0.850103735923767100
+    Fill.Gradient.StopPosition.Y = 0.850103735923767000
     Position.X = 16.000000000000000000
     Position.Y = 184.000000000000000000
     Size.Width = 513.000000000000000000
@@ -48,10 +47,10 @@ object Form1: TForm1
     Size.PlatformDefault = False
     CouleurRayon = Vert
     CouleurCercles = Blanc
-    Direction = 45.000000000000000000
+    Direction = 25.000000000000000000
     LargeurVisee = 20.000000000000000000
     AffichePI = True
-    Affichedir = True
+    Affichedir = False
     AfficheVisee = True
     Surlignage = -1
   end
@@ -87,15 +86,5 @@ object Form1: TForm1
     LongueurGraduationMajeure = 16
     LongueurGraduationMineure = 8
     Surlignage = -1
-  end
-  object vue: TImage
-    MultiResBitmap = <
-      item
-      end>
-    Position.X = 560.000000000000000000
-    Position.Y = 24.000000000000000000
-    Size.Width = 385.000000000000000000
-    Size.Height = 337.000000000000000000
-    Size.PlatformDefault = False
   end
 end
