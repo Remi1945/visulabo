@@ -109,6 +109,7 @@
         <DCCReference Include="JaugeRect.pas"/>
         <DCCReference Include="DoubleCurseur.pas"/>
         <DCCReference Include="PointInteret.pas"/>
+        <DCCReference Include="Radar.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

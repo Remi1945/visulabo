@@ -12,10 +12,12 @@ const
 
 type
   TGenre = (Horizontal, Vertical);
+  TUserProc = procedure(Sender: TObject) of object;
 
   TDoubleCurseur = class(TRectangle)
   private
-
+    FusrProc: TUserProc;
+    FusrProcSetMM, FusrProcSetMU: boolean;
     cursEnMain: integer;
     FMax: integer;
     FMin: integer;
@@ -36,9 +38,11 @@ type
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; x, y: Single); override;
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; x, y: Single); override;
     procedure MouseMove(Shift: TShiftState; x, y: Single); override;
+
   public
     constructor Create(AOwner: TComponent); override;
     procedure Paint; override;
+    procedure setProcUtilisateur(laproc: TUserProc; MM, MU: boolean);
   published
     property Genre: TGenre read FGenre write FGenre;
 
@@ -84,6 +88,8 @@ begin
   Width := 200;
   Height := 32;
   deltaV := calculeDeltaV;
+  FusrProcSetMM := false;
+  FusrProcSetMU := false;
 end;
 
 function TDoubleCurseur.getCurseurEnMain(x, y: Single): integer;
@@ -158,11 +164,18 @@ procedure TDoubleCurseur.MouseMove(Shift: TShiftState; x, y: Single);
 var
   nindx: integer;
 begin
-  nindx := getValCurseur(x, y);
-  if cursEnMain = 1 then
-    setValeur1(nindx);
-  if cursEnMain = 2 then
-    setValeur2(nindx);
+  if ssLeft in Shift then
+  begin
+    nindx := getValCurseur(x, y);
+    if cursEnMain = 1 then
+      setValeur1(nindx);
+    if cursEnMain = 2 then
+      setValeur2(nindx);
+    if FusrProcSetMM then
+      FusrProc(self);
+  end
+  else
+    cursEnMain := 0;
 end;
 
 procedure TDoubleCurseur.MouseUp(Button: TMouseButton; Shift: TShiftState; x, y: Single);
@@ -175,6 +188,8 @@ begin
   if cursEnMain = 2 then
     setValeur2(nindx);
   cursEnMain := 0;
+  if FusrProcSetMU then
+    FusrProc(self);
 end;
 
 procedure TDoubleCurseur.Paint;
@@ -200,12 +215,14 @@ begin
     Canvas.Fill.Color := ClaGray;
     Canvas.FillRect(TRectF.Create(0, Yc - Lcurs, Width, Yc + Lcurs), 0, 0, AllCorners, 1, TCornerType.round);
     Canvas.Fill.Color := ClaBlue;
-    Canvas.FillRect(TRectF.Create(lCurs2, Yc - Lcurs2, Width-Lcurs2, Yc + Lcurs2), 0, 0, AllCorners, 1, TCornerType.round);
+    Canvas.FillRect(TRectF.Create(Lcurs2, Yc - Lcurs2, Width - Lcurs2, Yc + Lcurs2), 0, 0, AllCorners, 1,
+      TCornerType.round);
     Yc := getPosCurseur(FValeur2);
     Canvas.Fill.Color := ClaGray;
     Canvas.FillRect(TRectF.Create(0, Yc - Lcurs, Width, Yc + Lcurs), 0, 0, AllCorners, 1, TCornerType.round);
     Canvas.Fill.Color := ClaRed;
-    Canvas.FillRect(TRectF.Create(lCurs2, Yc - Lcurs2, Width-Lcurs2, Yc + Lcurs2), 0, 0, AllCorners, 1, TCornerType.round);
+    Canvas.FillRect(TRectF.Create(Lcurs2, Yc - Lcurs2, Width - Lcurs2, Yc + Lcurs2), 0, 0, AllCorners, 1,
+      TCornerType.round);
   end;
 
   if FGenre = Horizontal then
@@ -256,7 +273,13 @@ begin
     FMin := Value;
     Repaint;
   end;
+end;
 
+procedure TDoubleCurseur.setProcUtilisateur(laproc: TUserProc; MM, MU: boolean);
+begin
+  FusrProc := laproc;
+  FusrProcSetMM := MM;
+  FusrProcSetMU := MU;
 end;
 
 procedure TDoubleCurseur.setValeur1(const Value: integer);
@@ -264,7 +287,7 @@ begin
   if (Value >= FMin) and (Value <= FMax) and (Value < FValeur2 - deltaV) then
   begin
     FValeur1 := Value;
-    repaint;
+    Repaint;
   end;
 end;
 
@@ -273,7 +296,7 @@ begin
   if (Value >= FMin) and (Value <= FMax) and (Value > FValeur1 + deltaV) then
   begin
     FValeur2 := Value;
-    repaint;
+    Repaint;
   end;
 end;
 
