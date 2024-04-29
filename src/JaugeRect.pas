@@ -24,6 +24,7 @@ type
     FAspectBordure: TMatiere;
     FXBordure: Single;
     FYBordure: Single;
+    FCirculaire:boolean;
     procedure SetFormatValeurs(Value: String);
     procedure SetGenreSeuil(Value: TGenreSeuil);
     procedure SetEpaisseurBordure(Value: integer);
@@ -43,6 +44,7 @@ type
     procedure SetMontreValeurs(Value: boolean);
     procedure SetMontreSeuils(Value: boolean);
     procedure SetGradMobile(Value: boolean);
+    procedure SetCirculaire(Value: boolean);
     function dessineBordure(Mat: TMatiere): TBitmap;
     procedure SetFGradMobile(Value: boolean);
     procedure setXBordure(Value: Single);
@@ -75,6 +77,7 @@ type
     property MontreGraduationMajeure: boolean read FMontreGraduationMajeure write SetMontreGraduationMajeure;
     property MontreValeurs: boolean read FMontreValeurs write SetMontreValeurs;
     property MontreSeuils: boolean read FMontreSeuils write SetMontreSeuils;
+    property Circulaire: boolean read FCirculaire write setCirculaire;
     property GraduationMobile: boolean read FGradMobile write SetGradMobile;
     property BordureX: Single read FXBordure write setXBordure;
     property BordureY: Single read FYBordure write setYBordure;
@@ -708,6 +711,7 @@ begin
   FAspectBordure := MAT_BRASS;
   FXBordure := 0.33;
   FYBordure := 0.33;
+  FCirculaire:=false;
 end;
 
 function TJaugeRect.dessineBordure(Mat: TMatiere): TBitmap;
@@ -788,6 +792,11 @@ end;
 procedure TJaugeRect.SetGenreSeuil(Value: TGenreSeuil);
 begin
   FGenreSeuil := Value;
+end;
+
+procedure TJaugeRect.SetCirculaire(Value: boolean);
+begin
+FCirculaire:=value;
 end;
 
 procedure TJaugeRect.SetDynamique(Value: double);

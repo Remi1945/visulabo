@@ -7,14 +7,13 @@ uses
   System.Variants, Pointinteret,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Objects,
   JaugeCir, FMX.Controls.Presentation, FMX.StdCtrls, JaugeRect, GraphicXYdeT,
-  Histogramme;
+  Histogramme, Radar;
 
 type
   TForm1 = class(TForm)
     Button1: TButton;
     Timer1: TTimer;
     Button2: TButton;
-    grhisto: THistogramme;
     procedure Button1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
   private
@@ -50,10 +49,7 @@ end;
 procedure TForm1.Timer1Timer(Sender: TObject);
 begin
   un := not(un);
-  if un then
-    grhisto.MajValeurs(histo1, 512, true)
-  else
-    grhisto.MajValeurs(histo2, 512, true);
+  
 end;
 
 end.
