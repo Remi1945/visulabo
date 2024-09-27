@@ -24,8 +24,11 @@ type
     FAspectBordure: TMatiere;
     FXBordure: Single;
     FYBordure: Single;
+<<<<<<< HEAD
     FCirculaire:boolean;
-
+=======
+    FCirculaire: boolean;
+>>>>>>> cfe7ce2dbaf606567aa9bc263d73085a46013f4b
     procedure SetFormatValeurs(Value: String);
     procedure SetGenreSeuil(Value: TGenreSeuil);
     procedure SetEpaisseurBordure(Value: integer);
@@ -82,7 +85,7 @@ type
     property GraduationMobile: boolean read FGradMobile write SetGradMobile;
     property BordureX: Single read FXBordure write setXBordure;
     property BordureY: Single read FYBordure write setYBordure;
-
+    property Circulaire: boolean read FCirculaire write FCirculaire;
   end;
 
 procedure Register;
@@ -720,9 +723,11 @@ begin
   FAspectBordure := MAT_BRASS;
   FXBordure := 0.33;
   FYBordure := 0.33;
-
+<<<<<<< HEAD
   FCirculaire:=false;
-
+=======
+  FCirculaire := true;
+>>>>>>> cfe7ce2dbaf606567aa9bc263d73085a46013f4b
 end;
 
 function TJaugeRect.dessineBordure(Mat: TMatiere): TBitmap;
