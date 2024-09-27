@@ -24,6 +24,7 @@ type
     FAspectBordure: TMatiere;
     FXBordure: Single;
     FYBordure: Single;
+    FCirculaire: boolean;
     procedure SetFormatValeurs(Value: String);
     procedure SetGenreSeuil(Value: TGenreSeuil);
     procedure SetEpaisseurBordure(Value: integer);
@@ -78,6 +79,7 @@ type
     property GraduationMobile: boolean read FGradMobile write SetGradMobile;
     property BordureX: Single read FXBordure write setXBordure;
     property BordureY: Single read FYBordure write setYBordure;
+    property Circulaire: boolean read FCirculaire write FCirculaire;
   end;
 
 procedure Register;
@@ -385,6 +387,13 @@ begin
           while not(fin) do
           begin
             grad := (grad0 + i * sens) * GraduationMajeure;
+            if Fcirculaire then
+             begin
+               if grad<Fmini then
+                grad:=grad+Fmaxi;
+                if grad>=Fmaxi then
+                grad:=grad-Fmaxi;
+             end;
             st := Format(FFormatValeurs, [grad]);
             Htxt := Canvas.TextHeight(st);
             Wtxt := Canvas.TextWidth(st);
@@ -708,6 +717,7 @@ begin
   FAspectBordure := MAT_BRASS;
   FXBordure := 0.33;
   FYBordure := 0.33;
+  FCirculaire := true;
 end;
 
 function TJaugeRect.dessineBordure(Mat: TMatiere): TBitmap;

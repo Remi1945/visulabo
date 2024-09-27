@@ -13,6 +13,7 @@ object Form1: TForm1
     Position.Y = 336.000000000000000000
     TabOrder = 1
     Text = 'Button1'
+    TextSettings.Trimming = None
   end
   object Timer1: TTimer
     Interval = 20
@@ -23,68 +24,13 @@ object Form1: TForm1
   object Button2: TButton
     Position.X = 1008.000000000000000000
     Position.Y = 368.000000000000000000
+    TabOrder = 2
     Text = 'Button2'
+    TextSettings.Trimming = None
     OnClick = Button2Click
   end
-  object Radar1: TRadar
-    Fill.Kind = Gradient
-    Fill.Gradient.Points = <
-      item
-        Color = xFF280364
-        Offset = 0.000000000000000000
-      end
-      item
-        Color = xFFC2B7DB
-        Offset = 1.000000000000000000
-      end>
-    Fill.Gradient.StartPosition.Y = 0.149896234273910500
-    Fill.Gradient.StopPosition.X = 1.000000000000000000
-    Fill.Gradient.StopPosition.Y = 0.850103735923767000
-    Position.X = 16.000000000000000000
-    Position.Y = 184.000000000000000000
-    Size.Width = 513.000000000000000000
-    Size.Height = 393.000000000000000000
-    Size.PlatformDefault = False
-    CouleurRayon = Vert
-    CouleurCercles = Blanc
-    Direction = 25.000000000000000000
-    LargeurVisee = 20.000000000000000000
-    AffichePI = True
-    Affichedir = False
-    AfficheVisee = True
-    Surlignage = -1
-  end
-  object GraphicXYdeT1: TGraphicXYdeT
-    Position.X = 88.000000000000000000
-    Position.Y = 48.000000000000000000
-    Size.Width = 177.000000000000000000
-    Size.Height = 153.000000000000000000
-    Size.PlatformDefault = False
-    CouleurDernierPoint = Rouge
-    CouleurAxe = Noir
-    CouleurGrille = Bleu
-    CouleurZone = Vert
-    FormatX = '%3.2f'
-    FormatY = '%3.2f'
-    NbValeurs = 200
-    EchelleMaxX = 1.000000000000000000
-    EchelleMinX = -1.000000000000000000
-    EchelleMaxY = 1.000000000000000000
-    EchelleMinY = -1.000000000000000000
-    ZoneMaxX = 0.500000000000000000
-    ZoneMinX = -0.500000000000000000
-    ZoneMaxY = 0.500000000000000000
-    ZoneMinY = -0.500000000000000000
-    EchelleAuto = True
-    Proportionel = False
-    AfficheAxe = True
-    AfficheGrille = False
-    AfficheZone = False
-    AffichePI = False
-    GraduationMajeure = 0.500000000000000000
-    GraduationMineure = 0.100000000000000000
-    LongueurGraduationMajeure = 16
-    LongueurGraduationMineure = 8
-    Surlignage = -1
+  object MainMenu1: TMainMenu
+    Left = 928
+    Top = 128
   end
 end
