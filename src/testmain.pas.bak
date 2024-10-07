@@ -7,21 +7,22 @@ uses
   System.Variants, Pointinteret,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Objects,
   JaugeCir, FMX.Controls.Presentation, FMX.StdCtrls, JaugeRect, GraphicXYdeT,
-  Histogramme, Radar, FMX.Menus, FMX.Edit, EditDG, Afficheur;
+  Histogramme, Radar, FMX.Menus, FMX.Edit, EditDG;
 
 type
   TForm1 = class(TForm)
     Button1: TButton;
     Timer1: TTimer;
     Button2: TButton;
-
+<<<<<<< HEAD
+    procedure Button1Click(Sender: TObject);
+=======
     MainMenu1: TMainMenu;
     // procedure Button1Click(Sender: TObject);
     // procedure Timer1Timer(Sender: TObject);
     procedure Button2Click(Sender: TObject);
-
+>>>>>>> cfe7ce2dbaf606567aa9bc263d73085a46013f4b
     procedure Timer1Timer(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
   private
     { Déclarations privées }
     histo1, histo2: array [0 .. 511] of integer;
@@ -37,23 +38,35 @@ implementation
 
 {$R *.fmx}
 
-
 procedure TForm1.Button1Click(Sender: TObject);
-
 var
   i: integer;
 begin
-
+<<<<<<< HEAD
+  Timer1.Enabled := true;
+  for i := 0 to 511 do
+  begin
+    histo1[i] := 0;
+    histo2[i] := 0;
+  end;
+  histo1[127] := 100;
+  histo2[127] := 10000;
+  Timer1.Enabled := true;
+=======
   myPI := TPi.Create('0deg', 30 / 180 * PI, 0.25, TForme.FrmCercle,
     $FFFF0000, 4);
 
-
-
+>>>>>>> cfe7ce2dbaf606567aa9bc263d73085a46013f4b
 end;
 
 procedure TForm1.Timer1Timer(Sender: TObject);
 begin
+<<<<<<< HEAD
+  un := not(un);
+  
+=======
 
+>>>>>>> cfe7ce2dbaf606567aa9bc263d73085a46013f4b
 end;
 
 end.
