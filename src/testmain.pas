@@ -7,7 +7,7 @@ uses
   System.Variants, Pointinteret,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Objects,
   JaugeCir, FMX.Controls.Presentation, FMX.StdCtrls, JaugeRect, GraphicXYdeT,
-  Histogramme, Radar, FMX.Menus, FMX.Edit, EditDG;
+  Histogramme, Radar, FMX.Menus, FMX.Edit, EditDG, Afficheur;
 
 type
   TForm1 = class(TForm)
@@ -19,6 +19,7 @@ type
     // procedure Timer1Timer(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
   private
     { Déclarations privées }
     histo1, histo2: array [0 .. 511] of integer;
@@ -48,12 +49,35 @@ implementation
   Timer1.Enabled := true;
   end;
 }
+procedure TForm1.Button1Click(Sender: TObject);
+var
+  I: integer;
+  bmp: TBitmap;
+  lst: TList;
+  x, y, h, l: single;
+begin
+  lst := TList.Create;
+  for I := 1 to 8 do
+  begin
+    bmp := TBitmap.Create(128, 128);
+    bmp.Canvas.BeginScene;
+    x := random(10) * 128 / 10;
+    y := random(10) * 128 / 10;
+    l := random(5) * 128 / 10;
+    h := random(5) * 128 / 10;
+    bmp.Canvas.DrawRect(TRectF.Create(0, 0, 128, 128), 1);
+    bmp.Canvas.DrawRect(TRectF.Create(x, y, x + l, y + h), 1);
+    bmp.Canvas.EndScene;
+    lst.Add(bmp);
+  end;
+  Afficheur1.setListe(lst);
+end;
+
 procedure TForm1.Button2Click(Sender: TObject);
 var
   myPI: TPi;
 begin
-  myPI := TPi.Create('0deg', 30 / 180 * PI, 0.25, TForme.FrmCercle,
-    $FFFF0000, 4);
+  myPI := TPi.Create('0deg', 30 / 180 * PI, 0.25, TForme.FrmCercle, $FFFF0000, 4);
 
 end;
 
