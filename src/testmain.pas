@@ -16,11 +16,8 @@ type
     Button2: TButton;
 
     MainMenu1: TMainMenu;
-    // procedure Button1Click(Sender: TObject);
-    // procedure Timer1Timer(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
+    Afficheur1: TAfficheur;
 
-    procedure Timer1Timer(Sender: TObject);
     procedure Button1Click(Sender: TObject);
   private
     { Déclarations privées }
@@ -37,23 +34,21 @@ implementation
 
 {$R *.fmx}
 
-
 procedure TForm1.Button1Click(Sender: TObject);
 
 var
   i: integer;
+  lst: TList;
+  bmp: TBitmap;
 begin
-
-  myPI := TPi.Create('0deg', 30 / 180 * PI, 0.25, TForme.FrmCercle,
-    $FFFF0000, 4);
-
-
-
-end;
-
-procedure TForm1.Timer1Timer(Sender: TObject);
-begin
-
+  lst := TList.Create;
+  for i := 1 to 5 do
+  begin
+    bmp := TBitmap.CreateFromFile
+      (Format('E:\perso\pdb\Graph\Terrains\France\Z3\TER%.4d.png', [i * 10]));
+    lst.Add(bmp);
+  end;
+  Afficheur1.setListe(lst);
 end;
 
 end.
