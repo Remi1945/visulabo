@@ -42,10 +42,10 @@ var
   bmp: TBitmap;
 begin
   lst := TList.Create;
-  for i := 1 to 5 do
+  for i := 1 to 6 do
   begin
     bmp := TBitmap.CreateFromFile
-      (Format('E:\perso\pdb\Graph\Terrains\France\Z3\TER%.4d.png', [i * 10]));
+      (Format('bmptest%d.bmp', [i]));
     lst.Add(bmp);
   end;
   Afficheur1.setListe(lst);

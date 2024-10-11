@@ -86,8 +86,7 @@ begin
       L := Height - 2 * Lcurs;
   end;
   if (FBmpLst <> nil) and (FBmpLst.Count > 0) then
-
-    pc := Lcurs + L * Findex / FBmpLst.Count
+    pc := Lcurs + L * Findex / (FBmpLst.Count-1)
   else
     pc := Lcurs;
 
