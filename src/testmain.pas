@@ -38,15 +38,17 @@ procedure TForm1.Button1Click(Sender: TObject);
 
 var
   i: integer;
-  lst: TList;
+  // lst: TList;
+  lst: TLstAvecRef;
   bmp: TBitmap;
 begin
-  lst := TList.Create;
+  // lst := TList.Create;
+  lst := TLstAvecRef.Create;
   for i := 1 to 6 do
   begin
-    bmp := TBitmap.CreateFromFile
-      (Format('bmptest%d.bmp', [i]));
-    lst.Add(bmp);
+    bmp := TBitmap.CreateFromFile(Format('bmptest%d.bmp', [i]));
+    // lst.Add(bmp);
+    lst.TryAdd(i * 2, bmp);
   end;
   Afficheur1.setListe(lst);
 end;

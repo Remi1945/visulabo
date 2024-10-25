@@ -4,7 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Types, FMX.Types, FMX.Controls,
-  FMX.Objects, FMX.Graphics, System.UITypes,
+  FMX.Objects, FMX.Graphics, System.UITypes, System.Generics.Collections,
   System.UIConsts, System.Math.Vectors;
 
 const
@@ -14,15 +14,18 @@ const
 type
   TGenre = (Horizontale, Verticale);
   TCadran = (Blanc, DegradeNoirClair, DegradeNoirFonce, Custom);
+  TLstAvecRef = TDictionary<integer, TBitmap>;
 
   TAfficheur = class(TRectangle)
   private
-
+    lstindex: array of integer;
     Findex: integer;
     FGenre: TGenre;
     FFactReduc: integer;
     FNbImg: integer;
+    FLstAvecRef: boolean;
     FBmpLst: TList;
+    FRefBmpLst: TLstAvecRef;
     FCadreCentral: boolean;
     FCurseur: boolean;
     y0curs, y1curs: Single;
@@ -35,16 +38,16 @@ type
     procedure setGliciereCurseur(Value: boolean);
     function getPosCurseur: Single;
     function getValCurseur(x, y: Single): integer;
+    function getImage(n: integer): TBitmap;
   protected
-    procedure MouseDown(Button: TMouseButton; Shift: TShiftState;
-      x, y: Single); override;
-    procedure MouseUp(Button: TMouseButton; Shift: TShiftState;
-      x, y: Single); override;
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; x, y: Single); override;
+    procedure MouseUp(Button: TMouseButton; Shift: TShiftState; x, y: Single); override;
     procedure MouseMove(Shift: TShiftState; x, y: Single); override;
   public
     constructor Create(AOwner: TComponent); override;
     procedure Paint; override;
-    procedure setListe(lst: TList);
+    procedure setListe(lst: TList); overload;
+    procedure setListe(lst: TLstAvecRef); overload;
 
   published
 
@@ -52,7 +55,7 @@ type
     property CadreCentral: boolean read FCadreCentral write setCadreCentral;
     property GliciereCurseur: boolean read FCurseur write setGliciereCurseur;
     property ReductionImages: integer read FFactReduc write SetFactReduc;
-
+    property ListeAvecReference: boolean read FLstAvecRef write FLstAvecRef;
     property NombreImagettes: integer read FNbImg write SetNbImagettes;
     property Index: integer read GetIndex write SetIndex;
   end;
@@ -66,18 +69,53 @@ begin
   RegisterComponents('VisuLabo', [TAfficheur]);
 end;
 
+function TAfficheur.getImage(n: integer): TBitmap;
+var
+  bmp: TBitmap;
+begin
+  if FLstAvecRef then
+  begin
+    if (FRefBmpLst = nil) or (FRefBmpLst.Keys.Count = 0) then
+      result := nil
+    else
+    begin
+      if (n >= 0) and (n < FRefBmpLst.Keys.Count) and FRefBmpLst.TryGetValue(lstindex[n], bmp) then
+        result := bmp
+      else
+        result := nil;
+    end;
+  end
+  else
+  begin
+    if (FBmpLst = nil) or (FBmpLst.Count = 0) or (n < 0) or (n >= FBmpLst.Count) then
+      result := nil
+    else
+      result := FBmpLst[n];
+  end;
+end;
+
 function TAfficheur.GetIndex: integer;
 begin
-  if (FBmpLst = nil) or (FBmpLst.Count = 0) then
-    result := 0
+  if FLstAvecRef then
+  begin
+    if (FRefBmpLst = nil) or (FRefBmpLst.Keys.Count = 0) then
+      result := 0
+    else
+      result := Findex;
+  end
   else
-    result := Findex;
+  begin
+    if (FBmpLst = nil) or (FBmpLst.Count = 0) then
+      result := 0
+    else
+      result := Findex;
+  end;
 end;
 
 function TAfficheur.getPosCurseur: Single;
-
 var
   pc, L: Single;
+  nbelem, indx: integer;
 begin
   case Genre of
     Horizontale:
@@ -85,10 +123,20 @@ begin
     Verticale:
       L := Height - 2 * Lcurs;
   end;
-  if (FBmpLst <> nil) and (FBmpLst.Count > 0) then
-    pc := Lcurs + L * Findex / (FBmpLst.Count-1)
+  if FLstAvecRef then
+  begin
+    if (FRefBmpLst <> nil) and (FRefBmpLst.Keys.Count > 0) then
+      pc := Lcurs + L * Findex / (FRefBmpLst.Keys.Count - 1)
+    else
+      pc := Lcurs;
+  end
   else
-    pc := Lcurs;
+  begin
+    if (FBmpLst <> nil) and (FBmpLst.Count > 0) then
+      pc := Lcurs + L * Findex / (FBmpLst.Count - 1)
+    else
+      pc := Lcurs;
+  end;
 
   result := pc;
 end;
@@ -104,7 +152,7 @@ var
   x1, x2, y1, y2: Single;
 
   mx, Himg, Wimg, HimgR, WimgR, Hcurs: Single;
-  Bmp: TBitmap;
+  bmp: TBitmap;
   indx: integer;
 begin
 
@@ -116,7 +164,8 @@ begin
   br.Free;
   Canvas.DrawRect(rect, 0, 0, AllCorners, 100, TCornerType.Round);
   Xc := Width / 2;
-  if (FBmpLst = nil) or (FBmpLst.Count = 0) then
+  if (not(FLstAvecRef) and ((FBmpLst = nil) or (FBmpLst.Count = 0))) or
+    (FLstAvecRef and ((FRefBmpLst = nil) or (FRefBmpLst.Keys.Count = 0))) then
   begin
     Himg := Height - 8;
     Yc := Height / 2;
@@ -126,13 +175,11 @@ begin
       Yc := Himg / 2 + 4;
     end;
     Wimg := Himg;
-    mx := (Width - (2 * FNbImg * FFactReduc / 100 + 1) * Wimg) /
-      (FNbImg * 2 + 1 + 1);
+    mx := (Width - (2 * FNbImg * FFactReduc / 100 + 1) * Wimg) / (FNbImg * 2 + 1 + 1);
     if mx < 0 then
     begin
       mx := 4;
-      Wimg := (Width - mx * (FNbImg * 2 + 1 + 1)) /
-        (2 * FNbImg * FFactReduc / 100 + 1);
+      Wimg := (Width - mx * (FNbImg * 2 + 1 + 1)) / (2 * FNbImg * FFactReduc / 100 + 1);
     end;
     y1 := Yc - Himg * FFactReduc / 100 / 2;
     y2 := Yc + Himg * FFactReduc / 100 / 2;
@@ -155,13 +202,12 @@ begin
     x2 := x1 + Wimg;
     Canvas.FillRect(TRectF.Create(x1, y1, x2, y2), 0, 0, AllCorners, 100);
     if FCadreCentral then
-      Canvas.DrawRect(TRectF.Create(x1, y1, x2, y2), Wimg / 8, Himg / 8,
-        AllCorners, 100);
+      Canvas.DrawRect(TRectF.Create(x1, y1, x2, y2), Wimg / 8, Himg / 8, AllCorners, 100);
   end
   else
   begin
-    Bmp := FBmpLst.First;
-    Himg := Bmp.Height;
+    bmp := getImage(0);
+    Himg := bmp.Height;
     if FCurseur then
     begin
       Himg := Height - 12 - 16;
@@ -170,37 +216,29 @@ begin
     else
       Yc := Himg / 2 + 4;
     HimgR := Himg * FFactReduc / 100;
-    Wimg := Bmp.Width;
+    Wimg := bmp.Width;
     WimgR := Wimg * FFactReduc / 100;
-    mx := (Width - (2 * FNbImg * FFactReduc / 100 + 1) * Wimg) /
-      (FNbImg * 2 + 1 + 1);
+    mx := (Width - (2 * FNbImg * FFactReduc / 100 + 1) * Wimg) / (FNbImg * 2 + 1 + 1);
     y1 := Yc - HimgR / 2;
     y2 := Yc + HimgR / 2;
     x1 := mx;
     indx := Findex - FNbImg;
     for i := 1 to 2 * FNbImg + 1 do
     begin
-      if (indx >= 0) and (indx < FBmpLst.Count) then
-        Bmp := FBmpLst.Items[indx]
-      else
-        Bmp := nil;
-
+      bmp := getImage(indx);
       if i <> FNbImg + 1 then
       begin
-        if Bmp <> nil then
-          Canvas.DrawBitmap(Bmp, TRectF.Create(0, 0, Wimg, Himg),
-            TRectF.Create(x1, y1, x1 + WimgR, y2), 1, false);
+        if bmp <> nil then
+          Canvas.DrawBitmap(bmp, TRectF.Create(0, 0, Wimg, Himg), TRectF.Create(x1, y1, x1 + WimgR, y2), 1, false);
         x1 := x1 + Wimg * FFactReduc / 100 + mx;
       end
       else
       begin
-        if Bmp <> nil then
-          Canvas.DrawBitmap(Bmp, TRectF.Create(0, 0, Wimg, Himg),
-            TRectF.Create(x1, Yc - Himg / 2, x1 + Wimg, Yc + Himg / 2),
+        if bmp <> nil then
+          Canvas.DrawBitmap(bmp, TRectF.Create(0, 0, Wimg, Himg), TRectF.Create(x1, Yc - Himg / 2, x1 + Wimg, Yc + Himg / 2),
             1, false);
         if FCadreCentral then
-          Canvas.DrawRect(TRectF.Create(x1, Yc - Himg / 2, x1 + Wimg,
-            Yc + Himg / 2), Wimg / 8, Himg / 8, AllCorners, 100);
+          Canvas.DrawRect(TRectF.Create(x1, Yc - Himg / 2, x1 + Wimg, Yc + Himg / 2), Wimg / 8, Himg / 8, AllCorners, 100);
         x1 := x1 + Wimg + mx;
       end;
       inc(indx);
@@ -212,20 +250,16 @@ begin
     begin
       // Fond de glissière
       Canvas.Fill.Color := ClaGray;
-      Canvas.FillRect(TRectF.Create(Width / 4, 0, 3 * Width / 4, Height), 0, 0,
-        AllCorners, 1, TCornerType.Round);
+      Canvas.FillRect(TRectF.Create(Width / 4, 0, 3 * Width / 4, Height), 0, 0, AllCorners, 1, TCornerType.Round);
       Canvas.Fill.Color := ClaBlack;
-      Canvas.FillRect(TRectF.Create(Width * (1 / 4 + 1 / 6), Lcurs,
-        Width * (3 / 4 - 1 / 6), Height - Lcurs), 0, 0, AllCorners, 1,
+      Canvas.FillRect(TRectF.Create(Width * (1 / 4 + 1 / 6), Lcurs, Width * (3 / 4 - 1 / 6), Height - Lcurs), 0, 0, AllCorners, 1,
         TCornerType.Round);
       // Dessin des curseurs
       Yc := getPosCurseur;
       Canvas.Fill.Color := ClaGray;
-      Canvas.FillRect(TRectF.Create(0, Yc - Lcurs, Width, Yc + Lcurs), 0, 0,
-        AllCorners, 1, TCornerType.Round);
+      Canvas.FillRect(TRectF.Create(0, Yc - Lcurs, Width, Yc + Lcurs), 0, 0, AllCorners, 1, TCornerType.Round);
       Canvas.Fill.Color := ClaBlue;
-      Canvas.FillRect(TRectF.Create(Lcurs2, Yc - Lcurs2, Width - Lcurs2,
-        Yc + Lcurs2), 0, 0, AllCorners, 1, TCornerType.Round);
+      Canvas.FillRect(TRectF.Create(Lcurs2, Yc - Lcurs2, Width - Lcurs2, Yc + Lcurs2), 0, 0, AllCorners, 1, TCornerType.Round);
     end;
 
     if FGenre = Horizontale then
@@ -235,23 +269,20 @@ begin
       y0curs := 4 + Himg + 4 + Hcurs / 4;
       y1curs := y0curs + Hcurs / 2;
       Canvas.Fill.Color := ClaGray;
-      Canvas.FillRect(TRectF.Create(0, y0curs, Width, y1curs), 0, 0, AllCorners,
-        1, TCornerType.Round);
+      Canvas.FillRect(TRectF.Create(0, y0curs, Width, y1curs), 0, 0, AllCorners, 1, TCornerType.Round);
       Canvas.Fill.Color := ClaBlack;
       y0curs := y0curs + Hcurs / 6;
       y1curs := y0curs + Hcurs / 6;
-      Canvas.FillRect(TRectF.Create(Lcurs, y0curs, Width - Lcurs, y1curs), 0, 0,
-        AllCorners, 1, TCornerType.Round);
+      Canvas.FillRect(TRectF.Create(Lcurs, y0curs, Width - Lcurs, y1curs), 0, 0, AllCorners, 1, TCornerType.Round);
       // Dessin des curseurs
       Xc := getPosCurseur;
       Canvas.Fill.Color := ClaGray;
       y0curs := 4 + Himg + 4;
       y1curs := y0curs + Hcurs;
-      Canvas.FillRect(TRectF.Create(Xc - Lcurs, y0curs, Xc + Lcurs, y1curs), 0,
-        0, AllCorners, 1, TCornerType.Round);
+      Canvas.FillRect(TRectF.Create(Xc - Lcurs, y0curs, Xc + Lcurs, y1curs), 0, 0, AllCorners, 1, TCornerType.Round);
       Canvas.Fill.Color := ClaBlue;
-      Canvas.FillRect(TRectF.Create(Xc - Lcurs2, y0curs + Lcurs2, Xc + Lcurs2,
-        y1curs - Lcurs2), 0, 0, AllCorners, 1, TCornerType.Round);
+      Canvas.FillRect(TRectF.Create(Xc - Lcurs2, y0curs + Lcurs2, Xc + Lcurs2, y1curs - Lcurs2), 0, 0, AllCorners, 1,
+        TCornerType.Round);
     end;
   end;
   Canvas.EndScene;
@@ -271,7 +302,10 @@ begin
   Findex := 0;
   FNbImg := 2;
   FBmpLst := nil;
+  FLstAvecRef := false;
+  FRefBmpLst := nil;
   FCadreCentral := false;
+  setLength(lstindex, 0);
   FCurseur := false;
 end;
 
@@ -295,11 +329,35 @@ procedure TAfficheur.SetIndex(Value: integer);
 begin
   if Findex <> Value then
   begin
-    if (FBmpLst <> nil) and (Value >= 0) and (Value < FBmpLst.Count) then
-      Findex := Value;
+    if FLstAvecRef then
+    begin
+      if (FRefBmpLst <> nil) and (Value >= 0) and (Value < FRefBmpLst.Keys.Count) then
+        Findex := Value;
+    end
+    else
+    begin
+      if (FBmpLst <> nil) and (Value >= 0) and (Value < FBmpLst.Count) then
+        Findex := Value;
+    end;
     Repaint;
   end;
 
+end;
+
+procedure TAfficheur.setListe(lst: TLstAvecRef);
+var
+  n, i: integer;
+begin
+  FRefBmpLst := lst;
+  setLength(lstindex, FRefBmpLst.Keys.Count);
+  n := 0;
+  for i in FRefBmpLst.Keys do
+  begin
+    lstindex[n] := i;
+    inc(n);
+  end;
+  Findex := 0;
+  Repaint;
 end;
 
 procedure TAfficheur.setListe(lst: TList);
@@ -318,7 +376,7 @@ end;
 function TAfficheur.getValCurseur(x, y: Single): integer;
 var
   pc, L: Single;
-  n: integer;
+  n, nbmax: integer;
 begin
   case Genre of
     Horizontale:
@@ -332,8 +390,13 @@ begin
         pc := y;
       end;
   end;
-  if (FBmpLst <> nil) and (FBmpLst.Count > 0) then
-    n := Round((pc - Lcurs) / L * FBmpLst.Count)
+  nbmax := 0;
+  if not(FLstAvecRef) and (FBmpLst <> nil) and (FBmpLst.Count > 0) then
+    nbmax := FBmpLst.Count;
+  if FLstAvecRef and (FRefBmpLst <> nil) and (FRefBmpLst.Keys.Count > 0) then
+    nbmax := FRefBmpLst.Keys.Count;
+  if nbmax > 0 then
+    n := Round((pc - Lcurs) / L * nbmax)
   else
     n := 0;
   result := n;
@@ -346,16 +409,14 @@ begin
     Index := getValCurseur(x, y);
 end;
 
-procedure TAfficheur.MouseUp(Button: TMouseButton; Shift: TShiftState;
-  x, y: Single);
+procedure TAfficheur.MouseUp(Button: TMouseButton; Shift: TShiftState; x, y: Single);
 
 begin
   if FCurseur and (y >= y0curs) and (y <= y1curs) then
     Index := getValCurseur(x, y);
 end;
 
-procedure TAfficheur.MouseDown(Button: TMouseButton; Shift: TShiftState;
-  x, y: Single);
+procedure TAfficheur.MouseDown(Button: TMouseButton; Shift: TShiftState; x, y: Single);
 var
   dx: Single;
   n: integer;
