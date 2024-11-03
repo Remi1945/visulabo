@@ -33,16 +33,16 @@ object Form1: TForm1
     Top = 128
   end
   object Afficheur1: TAfficheur
-    Position.X = 56.000000000000000000
-    Position.Y = 168.000000000000000000
-    Size.Width = 681.000000000000000000
+    Position.X = 88.000000000000000000
+    Position.Y = 160.000000000000000000
+    Size.Width = 657.000000000000000000
     Size.Height = 209.000000000000000000
     Size.PlatformDefault = False
     Genre = Horizontale
     CadreCentral = True
     GliciereCurseur = True
     ReductionImages = 70
-    ListeAvecReference = True
+    ListeAvecReference = False
     NombreImagettes = 2
     Index = 0
   end
