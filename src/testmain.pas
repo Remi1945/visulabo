@@ -16,7 +16,6 @@ type
     Button2: TButton;
 
     MainMenu1: TMainMenu;
-    Afficheur1: TAfficheur;
 
     procedure Button1Click(Sender: TObject);
   private

@@ -66,6 +66,7 @@ type
     property NombreImagettes: integer read FNbImg write SetNbImagettes;
     property Index: integer read GetIndex write SetIndex;
     property Reference: integer read getRef;
+
   end;
 
 procedure Register;
@@ -166,6 +167,8 @@ begin
   else
     result := -1;
 end;
+
+{$IFDEF IMAGE_PAS_AJUSTEE}
 
 procedure TAfficheur.Paint;
 
@@ -313,6 +316,167 @@ begin
   end;
   Canvas.EndScene;
 end;
+{$ELSE}
+
+procedure TAfficheur.Paint;
+
+var
+  rect, RectEcr: TRectF;
+  Xc, Yc: Single;
+  br: TBrush;
+  pen: TStrokeBrush;
+  i, j: integer;
+  x1, x2, y1, y2: Single;
+
+  mx, Himg, Wimg, HimgR, WimgR, Hcurs: Single;
+  bmp: TBitmap;
+  indx: integer;
+begin
+
+  Canvas.BeginScene;
+  // Fond transparent
+  br := TBrush.Create(TBrushKind.Solid, 0);
+  rect := TRectF.Create(0, 0, Width, Height);
+  Canvas.FillRect(rect, 0, 0, AllCorners, 100, br);
+  br.Free;
+  Canvas.DrawRect(rect, 0, 0, AllCorners, 100, TCornerType.Round);
+  Xc := Width / 2;
+
+  Himg := Height - 8;
+  Yc := Height / 2;
+  if FCurseur then
+  begin
+    Himg := Height - 12 - 16;
+    Yc := Himg / 2 + 4;
+  end;
+  Wimg := Himg;
+  mx := (Width - (2 * FNbImg * FFactReduc / 100 + 1) * Wimg) / (FNbImg * 2 + 1 + 1);
+  if mx < 0 then
+  begin
+    mx := 4;
+    Wimg := (Width - mx * (FNbImg * 2 + 1 + 1)) / (2 * FNbImg * FFactReduc / 100 + 1);
+  end;
+  y1 := Yc - Himg * FFactReduc / 100 / 2;
+  y2 := Yc + Himg * FFactReduc / 100 / 2;
+  x1 := mx;
+  Canvas.Fill.Color := claLightGray;
+  for i := 1 to 2 * FNbImg + 1 do
+  begin
+    bmp := getImage(indx);
+    if i <> FNbImg + 1 then
+    begin
+      x2 := x1 + Wimg * FFactReduc / 100;
+      if bmp = nil then
+        Canvas.FillRect(TRectF.Create(x1, y1, x2, y2), 0, 0, AllCorners, 100)
+      else
+        Canvas.DrawBitmap(bmp, TRectF.Create(0, 0, Wimg, Himg), TRectF.Create(x1, y1, x2, y2), 1, false);
+      x1 := x1 + Wimg * FFactReduc / 100 + mx;
+      x1 := x1 + Wimg * FFactReduc / 100 + mx;
+    end
+    else
+    begin
+      if bmp = nil then
+        x1 := x1 + Wimg + mx
+      else
+        Canvas.DrawBitmap(bmp, TRectF.Create(0, 0, Wimg, Himg), TRectF.Create(x1, Yc - Himg / 2, x1 + Wimg, Yc + Himg / 2),
+          1, false);
+    end;
+  end
+
+  y1 := Yc - Himg / 2;
+  y2 := Yc + Himg / 2;
+  x1 := Xc - Wimg / 2;
+  x2 := x1 + Wimg;
+  Canvas.FillRect(TRectF.Create(x1, y1, x2, y2), 0, 0, AllCorners, 100);
+  if FCadreCentral then
+    Canvas.DrawRect(TRectF.Create(x1, y1, x2, y2), Wimg / 8, Himg / 8, AllCorners, 100);
+
+  {
+    else
+    begin
+    bmp := getImage(0);
+    Himg := bmp.Height;
+    if FCurseur then
+    begin
+    Himg := Height - 12 - 16;
+    Yc := Himg / 2 + 4;
+    end
+    else
+    Yc := Himg / 2 + 4;
+    HimgR := Himg * FFactReduc / 100;
+    Wimg := bmp.Width;
+    WimgR := Wimg * FFactReduc / 100;
+    mx := (Width - (2 * FNbImg * FFactReduc / 100 + 1) * Wimg) / (FNbImg * 2 + 1 + 1);
+    y1 := Yc - HimgR / 2;
+    y2 := Yc + HimgR / 2;
+    x1 := mx;
+    indx := Findex - FNbImg;
+    for i := 1 to 2 * FNbImg + 1 do
+    begin
+    bmp := getImage(indx);
+    if i <> FNbImg + 1 then
+    begin
+    if bmp <> nil then
+    Canvas.DrawBitmap(bmp, TRectF.Create(0, 0, Wimg, Himg), TRectF.Create(x1, y1, x1 + WimgR, y2), 1, false);
+    x1 := x1 + Wimg * FFactReduc / 100 + mx;
+    end
+    else
+    begin
+    if bmp <> nil then
+    Canvas.DrawBitmap(bmp, TRectF.Create(0, 0, Wimg, Himg), TRectF.Create(x1, Yc - Himg / 2, x1 + Wimg, Yc + Himg / 2),
+    1, false);
+    if FCadreCentral then
+    Canvas.DrawRect(TRectF.Create(x1, Yc - Himg / 2, x1 + Wimg, Yc + Himg / 2), Wimg / 8, Himg / 8, AllCorners, 100);
+    x1 := x1 + Wimg + mx;
+    end;
+    inc(indx);
+    end;
+    end;
+  }
+  if FCurseur then
+  begin
+    if FGenre = Verticale then
+    begin
+      // Fond de glissière
+      Canvas.Fill.Color := ClaGray;
+      Canvas.FillRect(TRectF.Create(Width / 4, 0, 3 * Width / 4, Height), 0, 0, AllCorners, 1, TCornerType.Round);
+      Canvas.Fill.Color := ClaBlack;
+      Canvas.FillRect(TRectF.Create(Width * (1 / 4 + 1 / 6), Lcurs, Width * (3 / 4 - 1 / 6), Height - Lcurs), 0, 0, AllCorners, 1,
+        TCornerType.Round);
+      // Dessin des curseurs
+      Yc := getPosCurseur;
+      Canvas.Fill.Color := ClaGray;
+      Canvas.FillRect(TRectF.Create(0, Yc - Lcurs, Width, Yc + Lcurs), 0, 0, AllCorners, 1, TCornerType.Round);
+      Canvas.Fill.Color := ClaBlue;
+      Canvas.FillRect(TRectF.Create(Lcurs2, Yc - Lcurs2, Width - Lcurs2, Yc + Lcurs2), 0, 0, AllCorners, 1, TCornerType.Round);
+    end;
+
+    if FGenre = Horizontale then
+    begin
+      Hcurs := 16;
+      // Fond de glissière
+      y0curs := 4 + Himg + 4 + Hcurs / 4;
+      y1curs := y0curs + Hcurs / 2;
+      Canvas.Fill.Color := ClaGray;
+      Canvas.FillRect(TRectF.Create(0, y0curs, Width, y1curs), 0, 0, AllCorners, 1, TCornerType.Round);
+      Canvas.Fill.Color := ClaBlack;
+      y0curs := y0curs + Hcurs / 6;
+      y1curs := y0curs + Hcurs / 6;
+      Canvas.FillRect(TRectF.Create(Lcurs, y0curs, Width - Lcurs, y1curs), 0, 0, AllCorners, 1, TCornerType.Round);
+      // Dessin des curseurs
+      Xc := getPosCurseur;
+      Canvas.Fill.Color := ClaGray;
+      y0curs := 4 + Himg + 4;
+      y1curs := y0curs + Hcurs;
+      Canvas.FillRect(TRectF.Create(Xc - Lcurs, y0curs, Xc + Lcurs, y1curs), 0, 0, AllCorners, 1, TCornerType.Round);
+      Canvas.Fill.Color := ClaBlue;
+      Canvas.FillRect(TRectF.Create(Xc - Lcurs2, y0curs + Lcurs2, Xc + Lcurs2, y1curs - Lcurs2), 0, 0, AllCorners, 1,
+        TCornerType.Round);
+    end;
+  end;
+  Canvas.EndScene;
+end;
+{$ENDIF}
 
 procedure TAfficheur.setCadreCentral(Value: boolean);
 begin
@@ -358,6 +522,7 @@ begin
   FNbImg := 2;
   FBmpLst := TList.Create;
   FLstAvecRef := false;
+
   FRefBmpLst := TLstAvecRef.Create;
   FCadreCentral := false;
   setlength(lstindex, 0);
