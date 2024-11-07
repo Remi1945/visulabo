@@ -16,6 +16,7 @@ type
     Button2: TButton;
 
     MainMenu1: TMainMenu;
+    Afficheur1: TAfficheur;
 
     procedure Button1Click(Sender: TObject);
   private
@@ -43,9 +44,9 @@ var
 begin
   // lst := TList.Create;
   lst := TLstAvecRef.Create;
-  for i := 1 to 6 do
+  for i := 0 to 10 do
   begin
-    bmp := TBitmap.CreateFromFile(Format('bmptest%d.bmp', [i]));
+    bmp := TBitmap.CreateFromFile('E:\perso\Textures\'+Format('TEXTURE%.3d.png', [i]));
     // lst.Add(bmp);
     lst.TryAdd(i * 2, bmp);
   end;
