@@ -4,7 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Types, FMX.Types, FMX.Controls,
-  FMX.Objects, FMX.Graphics, System.UITypes, System.Generics.Collections,
+  FMX.Objects, FMX.Graphics, System.UITypes, System.Generics.Collections, FMX.StdCtrls,
   System.UIConsts, System.Math.Vectors;
 
 const
@@ -18,6 +18,7 @@ type
 
   TAfficheur = class(TRectangle)
   private
+    lblAffIndex: TLabel;
     lstindex: array of integer;
     Findex: integer;
     FGenre: TGenre;
@@ -66,7 +67,7 @@ type
     property NombreImagettes: integer read FNbImg write SetNbImagettes;
     property Index: integer read GetIndex write SetIndex;
     property Reference: integer read getRef;
-
+    property AffichageIndex: TLabel read lblAffIndex write lblAffIndex;
   end;
 
 procedure Register;
@@ -491,7 +492,7 @@ begin
   FNbImg := 2;
   FBmpLst := TList.Create;
   FLstAvecRef := false;
-
+  lblAffIndex := nil;
   FRefBmpLst := TLstAvecRef.Create;
   FCadreCentral := false;
   setlength(lstindex, 0);
@@ -526,12 +527,21 @@ begin
     if FLstAvecRef then
     begin
       if (Value >= 0) and (Value < FRefBmpLst.Keys.Count) then
+      begin
         Findex := Value;
+        if lblAffIndex <> nil then
+          lblAffIndex.Text := Format('%d', [lstindex[Findex]])
+      end;
+
     end
     else
     begin
       if (Value >= 0) and (Value < FBmpLst.Count) then
+      begin
         Findex := Value;
+        if lblAffIndex <> nil then
+          lblAffIndex.Text := Format('%d', [Findex])
+      end;
     end;
     Repaint;
   end;

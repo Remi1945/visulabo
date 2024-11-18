@@ -45,5 +45,12 @@ object Form1: TForm1
     ListeAvecReference = True
     NombreImagettes = 3
     Index = 0
+    AffichageIndex = Label1
+  end
+  object Label1: TLabel
+    Position.X = 360.000000000000000000
+    Position.Y = 296.000000000000000000
+    Text = 'Label1'
+    TabOrder = 6
   end
 end
