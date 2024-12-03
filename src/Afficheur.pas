@@ -34,6 +34,7 @@ type
     procedure SetIndex(Value: integer);
     function GetIndex: integer;
     function getRef: integer;
+    procedure SetRef(Value: integer);
     procedure SetFactReduc(Value: integer);
     procedure SetNbImagettes(Value: integer);
     procedure setCadreCentral(Value: boolean);
@@ -66,7 +67,7 @@ type
     property ListeAvecReference: boolean read FLstAvecRef write FLstAvecRef;
     property NombreImagettes: integer read FNbImg write SetNbImagettes;
     property Index: integer read GetIndex write SetIndex;
-    property Reference: integer read getRef;
+    property Reference: integer read getRef write SetRef;
     property AffichageIndex: TLabel read lblAffIndex write lblAffIndex;
   end;
 
@@ -167,6 +168,25 @@ begin
   end
   else
     result := -1;
+end;
+
+procedure TAfficheur.SetRef(Value: integer);
+var
+  trv: boolean;
+  n: integer;
+begin
+  if FLstAvecRef and (FRefBmpLst.Keys.Count > 0) then
+  begin
+    n := 0;
+    trv := false;
+    while not(trv) and (n < FRefBmpLst.Keys.Count) do
+    begin
+      trv := lstindex[n] = Value;
+      inc(n);
+    end;
+    if trv then
+      setIndex(n - 1);
+  end;
 end;
 
 {$IFDEF IMAGE_PAS_AJUSTEE}
