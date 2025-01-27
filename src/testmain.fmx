@@ -35,8 +35,8 @@ object Form1: TForm1
   object Afficheur1: TAfficheur
     Position.X = 32.000000000000000000
     Position.Y = 152.000000000000000000
-    Size.Width = 665.000000000000000000
-    Size.Height = 102.000000000000000000
+    Size.Width = 545.000000000000000000
+    Size.Height = 129.000000000000000000
     Size.PlatformDefault = False
     Genre = Horizontale
     CadreCentral = True
@@ -45,11 +45,12 @@ object Form1: TForm1
     ListeAvecReference = True
     NombreImagettes = 3
     Index = 0
+    Reference = -1
     AffichageIndex = Label1
   end
   object Label1: TLabel
-    Position.X = 360.000000000000000000
-    Position.Y = 296.000000000000000000
+    Position.X = 336.000000000000000000
+    Position.Y = 464.000000000000000000
     Text = 'Label1'
     TabOrder = 6
   end

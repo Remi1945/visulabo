@@ -185,7 +185,7 @@ begin
       inc(n);
     end;
     if trv then
-      setIndex(n - 1);
+      SetIndex(n - 1);
   end;
 end;
 
@@ -371,7 +371,12 @@ begin
     Himg := Height - 12 - 16;
     Yc := Himg / 2 + 4;
   end;
-  Wimg := Himg;
+  bmp := getImage(0);
+  if bmp = nil then
+    Wimg := Himg
+  else
+    Wimg := bmp.Width * Himg / bmp.Height;
+
   mx := (Width - (2 * FNbImg * FFactReduc / 100 + 1) * Wimg) / (FNbImg * 2 + 1 + 1);
   if mx < 0 then
   begin

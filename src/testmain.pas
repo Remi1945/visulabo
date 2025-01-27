@@ -45,9 +45,9 @@ var
 begin
   // lst := TList.Create;
   lst := TLstAvecRef.Create;
-  for i := 0 to 10 do
+  for i := 1 to 10 do
   begin
-    bmp := TBitmap.CreateFromFile('D:\Projets\Delphi\pdb\Graph\Textures\'+Format('TEXTURE%.3d.png', [i]));
+    bmp := TBitmap.CreateFromFile('D:\Projets\Delphi\pdb\Graph\illustrations\'+Format('trp%.6d.bmp', [i]));
     // lst.Add(bmp);
     lst.TryAdd(i * 2, bmp);
   end;
