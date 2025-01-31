@@ -6,7 +6,7 @@
         <Projects Include="packvisulabo.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="test.dproj">
+        <Projects Include="apptest.dproj">
             <Dependencies/>
         </Projects>
     </ItemGroup>
@@ -26,23 +26,23 @@
     <Target Name="packvisulabo:Make">
         <MSBuild Projects="packvisulabo.dproj" Targets="Make"/>
     </Target>
-    <Target Name="test">
-        <MSBuild Projects="test.dproj"/>
+    <Target Name="apptest">
+        <MSBuild Projects="apptest.dproj"/>
     </Target>
-    <Target Name="test:Clean">
-        <MSBuild Projects="test.dproj" Targets="Clean"/>
+    <Target Name="apptest:Clean">
+        <MSBuild Projects="apptest.dproj" Targets="Clean"/>
     </Target>
-    <Target Name="test:Make">
-        <MSBuild Projects="test.dproj" Targets="Make"/>
+    <Target Name="apptest:Make">
+        <MSBuild Projects="apptest.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="packvisulabo;test"/>
+        <CallTarget Targets="packvisulabo;apptest"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="packvisulabo:Clean;test:Clean"/>
+        <CallTarget Targets="packvisulabo:Clean;apptest:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="packvisulabo:Make;test:Make"/>
+        <CallTarget Targets="packvisulabo:Make;apptest:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

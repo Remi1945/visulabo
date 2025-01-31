@@ -1,9 +1,9 @@
-program test;
+﻿program apptest;
 
 uses
   System.StartUpCopy,
   FMX.Forms,
-  testmain in 'testmain.pas' {Form1};
+  testvisu in 'testvisu.pas' {Form1};
 
 {$R *.res}
 

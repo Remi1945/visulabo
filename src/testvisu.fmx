@@ -1,0 +1,27 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  Caption = 'Form1'
+  ClientHeight = 654
+  ClientWidth = 1062
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  DesignerMasterStyle = 0
+  object HorizonArtificiel1: THorizonArtificiel
+    Position.X = 208.000000000000000000
+    Position.Y = 136.000000000000000000
+    Size.Width = 457.000000000000000000
+    Size.Height = 409.000000000000000000
+    Size.PlatformDefault = False
+    Roulis = 10.000000000000000000
+    EpaisseurBordure = 10
+  end
+  object Timer1: TTimer
+    Interval = 200
+    OnTimer = Timer1Timer
+    Left = 824
+    Top = 224
+  end
+end

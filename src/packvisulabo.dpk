@@ -49,6 +49,7 @@ contains
   DoubleCurseur in 'DoubleCurseur.pas',
   PointInteret in 'PointInteret.pas',
   Radar in 'Radar.pas',
-  Afficheur in 'Afficheur.pas';
+  Afficheur in 'Afficheur.pas',
+  HorizonArtificiel in 'HorizonArtificiel.pas';
 
 end.
