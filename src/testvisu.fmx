@@ -9,19 +9,20 @@ object Form1: TForm1
   FormFactor.Devices = [Desktop]
   OnCreate = FormCreate
   DesignerMasterStyle = 0
-  object HorizonArtificiel1: THorizonArtificiel
-    Position.X = 208.000000000000000000
-    Position.Y = 136.000000000000000000
-    Size.Width = 457.000000000000000000
-    Size.Height = 409.000000000000000000
-    Size.PlatformDefault = False
-    Roulis = 10.000000000000000000
-    EpaisseurBordure = 10
-  end
   object Timer1: TTimer
     Interval = 200
     OnTimer = Timer1Timer
     Left = 824
     Top = 224
+  end
+  object HorizonArtificiel1: THorizonArtificiel
+    Position.X = 32.000000000000000000
+    Position.Y = 40.000000000000000000
+    Size.Width = 529.000000000000000000
+    Size.Height = 569.000000000000000000
+    Size.PlatformDefault = False
+    EpaisseurBordure = 10
+    TextSettings.Font.Size = 16.000000000000000000
+    TextSettings.FontColor = claYellow
   end
 end

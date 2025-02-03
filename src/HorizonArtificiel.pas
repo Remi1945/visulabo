@@ -29,6 +29,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     procedure Paint; override;
+    procedure setRoulisTangage(rl, tg: double);
   published
     property Roulis: double read FRoulis write SetRoulis;
     property Tangage: double read getTangage write SetTangage;
@@ -71,6 +72,8 @@ var
   lg: double;
   mrg: double;
   Wtxt: single;
+  vr: integer;
+  serr: string;
 
   function toAlpha(x, y: double): double;
   var
@@ -102,7 +105,7 @@ var
     end;
     result := alpha;
   end;
-
+{$IFDEF VERSION1}
   procedure ecrit(valeur: integer; angle: double; pGau, pDRt: TPointf);
   var
     bmpEcr: TBitmap;
@@ -139,23 +142,80 @@ var
       1, false);
     FreeAndNil(bmpEcr);
   end;
+{$ENDIF}
+  procedure ecritT(valeur: integer; angle: double; pGau, pDRt: TPointf);
+  var
+    bmpEcr: TBitmap;
+    st: string;
+    ptE: TPointf;
+  begin
+    bmpEcr := TBitmap.Create(round(Wtxt * 2), round(Wtxt * 2));
+    bmpEcr.Clear(0);
+    bmpEcr.Canvas.BeginScene;
+    bmpEcr.Canvas.Font.Family := TextSettings.Font.Family;
+    bmpEcr.Canvas.Font.Size := TextSettings.Font.Size;
+    bmpEcr.Canvas.Font.Style := TextSettings.Font.Style;
+    bmpEcr.Canvas.Fill.Color := TextSettings.FontColor;
+
+    st := Format('%d', [valeur]);
+    bmpEcr.Canvas.FillText(TRectF.Create(0, 0, 2 * Wtxt, 2 * Wtxt), st, false, 1, [], TTextAlign.Center, TTextAlign.Center);
+    bmpEcr.Canvas.EndScene;
+    bmpEcr.Rotate(angle / PI * 180);
+    ptE := TPointf.Create(pGau.x - Wtxt / 2 * vectU.x, pGau.y - Wtxt / 2 * vectU.y);
+    Canvas.DrawBitmap(bmpEcr, TRectF.Create(0, 0, bmpEcr.Width, bmpEcr.Height),
+      TRectF.Create(ptE.x - bmpEcr.Width / 2, ptE.y - bmpEcr.Height / 2, ptE.x + bmpEcr.Width / 2, ptE.y + bmpEcr.Height / 2),
+      1, false);
+    ptE := TPointf.Create(pDRt.x + Wtxt / 2 * vectU.x, pDRt.y + Wtxt / 2 * vectU.y);
+    Canvas.DrawBitmap(bmpEcr, TRectF.Create(0, 0, bmpEcr.Width, bmpEcr.Height),
+      TRectF.Create(ptE.x - bmpEcr.Width / 2, ptE.y - bmpEcr.Height / 2, ptE.x + bmpEcr.Width / 2, ptE.y + bmpEcr.Height / 2),
+      1, false);
+    FreeAndNil(bmpEcr);
+  end;
+  procedure ecritR(valeur: integer; angle: double);
+  var
+    bmpEcr: TBitmap;
+    st: string;
+    ptE: TPointf;
+  begin
+    bmpEcr := TBitmap.Create(round(Wtxt * 2), round(Wtxt * 2));
+    bmpEcr.Clear(0);
+    bmpEcr.Canvas.BeginScene;
+    bmpEcr.Canvas.Font.Family := TextSettings.Font.Family;
+    bmpEcr.Canvas.Font.Size := TextSettings.Font.Size;
+    bmpEcr.Canvas.Font.Style := TextSettings.Font.Style;
+    bmpEcr.Canvas.Fill.Color := TextSettings.FontColor;
+
+    st := Format('%d', [valeur]);
+    bmpEcr.Canvas.FillText(TRectF.Create(0, 0, 2 * Wtxt, 2 * Wtxt), st, false, 1, [], TTextAlign.Center, TTextAlign.Center);
+    bmpEcr.Canvas.EndScene;
+    bmpEcr.Rotate(90 + angle / PI * 180);
+    ptE.x := ptO.x + (rayon + mrg) * cos(angle);
+    ptE.y := ptO.y + (rayon + mrg) * sin(angle);
+
+    Canvas.DrawBitmap(bmpEcr, TRectF.Create(0, 0, bmpEcr.Width, bmpEcr.Height),
+      TRectF.Create(ptE.x - bmpEcr.Width / 2, ptE.y - bmpEcr.Height / 2, ptE.x + bmpEcr.Width / 2, ptE.y + bmpEcr.Height / 2),
+      1, false);
+    FreeAndNil(bmpEcr);
+  end;
 
 begin
   inherited;
   Canvas.BeginScene;
   // Fond transparent
-  Canvas.FillRect(TRectF.Create(0, 0, Width, Height), 0, 0, AllCorners, 100, TBrush.Create(TBrushKind.Solid, 0));
+  Canvas.FillRect(TRectF.Create(0, 0, Width, Height), 0, 0, AllCorners, 100, TBrush.Create(TBrushKind.Solid, $FF000000));
   if Width > Height then
     rayon := Height / 2 - 2 * FEpaisseurBordure
   else
     rayon := Width / 2 - 2 * FEpaisseurBordure;
   dalpha := arcSin(2 / rayon);
+  mrg := rayon / 20;
   Canvas.Font.Family := TextSettings.Font.Family;
   Canvas.Font.Size := TextSettings.Font.Size;
   Canvas.Font.Style := TextSettings.Font.Style;
 
   Wtxt := Canvas.TextWidth('000');
 
+  // Canvas.FillText(TRectF.Create(0, 0, 2 * Wtxt, 2 * Wtxt), 'toto', false, 1, [], TTextAlign.Center, TTextAlign.Center);
   // calcul de la position de la limite air/sol
   vectU := TPointf.Create(cos(FRoulis * PI / 180), sin(FRoulis * PI / 180));
   vectV := TPointf.Create(vectU.y, -vectU.x);
@@ -239,10 +299,9 @@ begin
   dalpha := 5 * rayon / anglemax;
   for i := 1 to 6 do
   begin
+    lg := rayon / 8;
     if i mod 2 = 0 then
-      lg := rayon / 4
-    else
-      lg := rayon / 8;
+      lg := rayon / 4;
     ptA.x := xh + vectV.x * i * dalpha - lg * vectU.x;
     ptA.y := yh + vectV.y * i * dalpha - lg * vectU.y;
     if ptO.Distance(ptA) < rayon then
@@ -253,9 +312,10 @@ begin
       begin
         Canvas.DrawLine(ptA, ptB, 1);
         if i mod 2 = 0 then
-          ecrit(i * 5, FRoulis / 180 * PI, ptA, ptB);
+          ecritT(i * 5, FRoulis / 180 * PI, ptA, ptB);
       end;
     end;
+
     ptA.x := xh - vectV.x * i * dalpha - lg * vectU.x;
     ptA.y := yh - vectV.y * i * dalpha - lg * vectU.y;
     if ptO.Distance(ptA) < rayon then
@@ -266,10 +326,11 @@ begin
       begin
         Canvas.DrawLine(ptA, ptB, 1);
         if i mod 2 = 0 then
-          ecrit(-i * 5, FRoulis / 180 * PI, ptA, ptB);
+          ecritT(-i * 5, FRoulis / 180 * PI, ptA, ptB);
       end;
     end;
   end;
+  lg := rayon / 3;
   ptA.x := xh - lg * vectU.x;
   ptA.y := yh - lg * vectU.y;
   if ptO.Distance(ptA) < rayon then
@@ -277,16 +338,24 @@ begin
     ptB.x := xh + lg * vectU.x;
     ptB.y := yh + lg * vectU.y;
     if ptO.Distance(ptB) < rayon - lg - mrg then
+    begin
       Canvas.DrawLine(ptA, ptB, 1);
+      ecritT(0, FRoulis / 180 * PI, ptA, ptB);
+    end;
   end;
+
   // dessin graduation roulis
-  mrg := rayon / 20;
+
   alpha0 := 210 / 180 * PI;
   dalpha := 5 / 180 * PI;
+  vr := -60;
   for i := 0 to 24 do
   begin
     if i mod 2 = 0 then
-      lg := 2 * mrg
+    begin
+      lg := 2 * mrg;
+      ecritR(vr, alpha0 + i * dalpha);
+    end
     else
       lg := mrg;
     ptA.x := ptO.x + (rayon - mrg) * cos(alpha0 + i * dalpha);
@@ -294,6 +363,7 @@ begin
     ptA.y := ptO.y + (rayon - mrg) * sin(alpha0 + i * dalpha);
     ptB.y := ptO.y + (rayon - mrg - lg) * sin(alpha0 + i * dalpha);
     Canvas.DrawLine(ptA, ptB, 1);
+    vr := vr + 5;
   end;
   setlength(pol, 4);
   lg := rayon / 10;
@@ -316,6 +386,16 @@ begin
     Repaint;
   end;
 
+end;
+
+procedure THorizonArtificiel.setRoulisTangage(rl, tg: double);
+begin
+  if (Ftangage <> -tg) or (FRoulis <> rl) then
+  begin
+    Ftangage := -tg;
+    FRoulis := rl;
+    Repaint;
+  end;
 end;
 
 procedure THorizonArtificiel.SetTangage(Value: double);

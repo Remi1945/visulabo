@@ -8,8 +8,8 @@ uses
 
 type
   TForm1 = class(TForm)
-    HorizonArtificiel1: THorizonArtificiel;
     Timer1: TTimer;
+    HorizonArtificiel1: THorizonArtificiel;
     procedure Timer1Timer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
   private
@@ -35,16 +35,16 @@ end;
 procedure TForm1.Timer1Timer(Sender: TObject);
 
 begin
-  HorizonArtificiel1.Tangage := HorizonArtificiel1.Tangage + sensT;
   if HorizonArtificiel1.Tangage > 12 then
     sensT := -1;
   if HorizonArtificiel1.Tangage < -14 then
     sensT := 1;
-  HorizonArtificiel1.Roulis := HorizonArtificiel1.Roulis + sensR;
+
   if HorizonArtificiel1.Roulis > 24 then
     sensR := -1;
   if HorizonArtificiel1.Roulis < -35 then
     sensR := 1;
+  HorizonArtificiel1.setRoulisTangage(HorizonArtificiel1.Roulis + sensR, HorizonArtificiel1.Tangage + sensT);
 end;
 
 end.
